@@ -32,11 +32,13 @@ class ParseTree(BinaryTree):
             else:
                 raise ValueError
                 return tree
+
             
 
 
 if __name__ == '__main__':
-    tree = ParseTree('(3+(4*5))')
+    tree = ParseTree('(3+5)')
+
     tree.build()
 
     
