@@ -33,7 +33,22 @@ class ParseTree(BinaryTree):
                 raise ValueError
                 return tree
 
+        def evaluate(self, tree): #evaluation
+            leftTree = tree.getLeftTree()
+            rightTree = tree.getRightTree()
+            op = tree.getKey()
             
+            if leftTree is not None and rightTree is not None:
+                if op == '+':
+                    return self.evaluate(leftTree) + self.evaluate(rightTree)
+                elif op == '-':
+                    return self.evaluate(leftTree) - self.evaluate(rightTree)
+                elif op == '*':
+                    return self.evaluate(leftTree) * self.evaluate(rightTree)
+                elif op == '/':
+                    return self.evaluate(leftTree) / self.evaluate(rightTree)
+            else:
+                return float(tree.getKey()) if str(tree.getKey()).replace('.', '', 1).isdigit() else None    
 
 
 if __name__ == '__main__':
