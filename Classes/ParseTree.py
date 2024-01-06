@@ -1,18 +1,20 @@
-import regex as re
+import re
 from BinaryTree import BinaryTree
 from Stack import Stack
 
 class ParseTree(BinaryTree):
-    def __init__(self, expression):
-        self.expression = expression
-        self.tokens = re.findall(r'\d+|\+|\-|\*|\/|\*\*|\(|\)', expression)
+    def __init__(self, expression, storage=None):
+        super().__init__(expression)
+        self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\+|\-|\*|\/|\*\*|\(|\)', expression)
         self.current_index = 0
+        self.storage = storage or {}
 
     def build(self):
         stack = Stack()
         tree = BinaryTree('?')
         stack.push(tree)
         currentTree = tree
+
         for t in self.tokens:
             if t == '(':
                 currentTree.insertLeft('?')
@@ -23,37 +25,45 @@ class ParseTree(BinaryTree):
                 currentTree.insertRight('?')
                 stack.push(currentTree)
                 currentTree = currentTree.getRightTree()
-            elif t not in ['+', '-', '*', '/', ')'] :
-                currentTree.setKey(int(t))
-                parent = stack.pop()
-                currentTree = parent
             elif t == ')':
                 currentTree = stack.pop()
-            else:
-                raise ValueError
-                return tree
+            elif t not in ['+', '-', '*', '/', ')']:
+                # Check if it's a numeric value or a variable
+                if t.isdigit():
+                    currentTree.setKey(int(t))
+                else:
+                    currentTree.setKey(t)
+                
+                parent = stack.pop()
+                currentTree = parent
 
-        def evaluate(self, tree): #evaluation
-            leftTree = tree.getLeftTree()
-            rightTree = tree.getRightTree()
-            op = tree.getKey()
-            
-            if leftTree is not None and rightTree is not None:
-                if op == '+':
-                    return self.evaluate(leftTree) + self.evaluate(rightTree)
-                elif op == '-':
-                    return self.evaluate(leftTree) - self.evaluate(rightTree)
-                elif op == '*':
-                    return self.evaluate(leftTree) * self.evaluate(rightTree)
-                elif op == '/':
-                    return self.evaluate(leftTree) / self.evaluate(rightTree)
-            else:
-                return float(tree.getKey()) if str(tree.getKey()).replace('.', '', 1).isdigit() else None    
+        return tree
 
+    def evaluate(self):
+        return self._evaluate_recursive(self.build())
 
-if __name__ == '__main__':
-    tree = ParseTree('(3+5)')
+    def _evaluate_recursive(self, node):
+        if node is None:
+            return None
 
-    tree.build()
+        if isinstance(node.getKey(), int):
+            return node.getKey()  # Numeric value, return as is
 
-    
+        operator = node.getKey()
+        left_value = self._evaluate_recursive(node.getLeftTree())
+        right_value = self._evaluate_recursive(node.getRightTree())
+
+        if operator == '+':
+            return left_value + right_value
+        elif operator == '-':
+            return left_value - right_value
+        elif operator == '*':
+            return left_value * right_value
+        elif operator == '/':
+            return left_value / right_value
+        elif operator == '**':
+            return left_value ** right_value
+        else:
+            # Assuming it's a variable
+            return self.storage.get(operator)
+
