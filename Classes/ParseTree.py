@@ -53,6 +53,10 @@ class ParseTree(BinaryTree):
         left_value = self._evaluate_recursive(node.getLeftTree())
         right_value = self._evaluate_recursive(node.getRightTree())
 
+        # Check for None values before performing operations
+        if left_value is None or right_value is None:
+            return None
+
         if operator == '+':
             return left_value + right_value
         elif operator == '-':
@@ -65,5 +69,8 @@ class ParseTree(BinaryTree):
             return left_value ** right_value
         else:
             # Assuming it's a variable
-            return self.storage.get(operator)
+            return self._get_variable_value(operator, left_value, right_value)
 
+    def _get_variable_value(self, variable, left_value, right_value):
+        # Get the value of the variable from the storage or use the calculated value
+        return self.storage.get(variable, None) or right_value
