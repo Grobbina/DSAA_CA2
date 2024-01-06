@@ -45,7 +45,22 @@ class Gui:
             elif num == 2:
                 print("\nCurrent Assignments:")
                 for var, parsed_tree in self.storage.items():
-                    print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
+                    if parsed_tree.evaluate() is None:
+                        parsed_tree_str = str(parsed_tree)  # Convert the object to a string
+                        match = re.search(r'\((\w+)', parsed_tree_str)
+                        if match:
+                            #search the storage for the variable
+                            variable = match.group(1)
+                            if variable in self.storage:
+                                #replace the variable with the value
+                                parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
+                                #convert the string back to a tree
+                                parsed_tree_new = ParseTree(parsed_tree_str)
+                                print(f"{var}={parsed_tree}-->{parsed_tree_new.evaluate()}")
+                            else:
+                                print(f"{var}={parsed_tree}-->None")
+                    else:
+                        print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
 
             elif num == 3:
                 print(3)
