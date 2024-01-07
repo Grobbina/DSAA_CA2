@@ -4,10 +4,10 @@ from Stack import Stack
 
 class ParseTree(BinaryTree):
     def __init__(self, expression, storage=None):
-        super().__init__(expression)
         self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\+|\-|\*|\/|\*\*|\(|\)', expression)
         self.current_index = 0
         self.storage = storage or {}
+        self.tree = self.build()
 
     def build(self):
         stack = Stack()
@@ -28,7 +28,6 @@ class ParseTree(BinaryTree):
             elif t == ')':
                 currentTree = stack.pop()
             elif t not in ['+', '-', '*', '/', ')']:
-                # Check if it's a numeric value or a variable
                 if t.isdigit():
                     currentTree.setKey(int(t))
                 else:
@@ -36,7 +35,6 @@ class ParseTree(BinaryTree):
                 
                 parent = stack.pop()
                 currentTree = parent
-
         return tree
 
     def evaluate(self):
@@ -47,13 +45,12 @@ class ParseTree(BinaryTree):
             return None
 
         if isinstance(node.getKey(), int):
-            return node.getKey()  # Numeric value, return as is
+            return node.getKey()
 
         operator = node.getKey()
         left_value = self._evaluate_recursive(node.getLeftTree())
         right_value = self._evaluate_recursive(node.getRightTree())
 
-        # Check for None values before performing operations
         if left_value is None or right_value is None:
             return None
 
@@ -72,5 +69,29 @@ class ParseTree(BinaryTree):
             return self._get_variable_value(operator, left_value, right_value)
 
     def _get_variable_value(self, variable, left_value, right_value):
-        # Get the value of the variable from the storage or use the calculated value
         return self.storage.get(variable, None) or right_value
+    
+    def printPreorder(self, level):
+        leftTree = self.tree.getLeftTree()
+        rightTree = self.tree.getRightTree()
+        print( str(level*'-') + str(self.tree.getKey()))
+        if leftTree != None:
+            leftTree.printPreorder(level+1)
+        if rightTree != None:
+            rightTree.printPreorder(level+1)
+
+    #print expression in order of mathematical operations
+    def printInorder(self, level):
+        leftTree = self.tree.getLeftTree()
+        rightTree = self.tree.getRightTree()
+        if rightTree != None:
+            rightTree.printInorder(level+1)
+        print( str(level*'-') + str(self.tree.getKey()))
+        if leftTree != None:
+            leftTree.printInorder(level+1)
+        
+
+if __name__ == '__main__':
+    tree = ParseTree('(a*(1+2))')
+    print(type(tree))
+    tree.printInorder(0)

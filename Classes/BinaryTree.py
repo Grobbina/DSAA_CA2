@@ -31,13 +31,14 @@ class BinaryTree:
             self.leftTree.printPreorder(level+1)
         if self.rightTree != None:
             self.rightTree.printPreorder(level+1)
-
+    
     def printInorder(self, level):
-        if self.leftTree != None:
-            self.leftTree.printInorder(level+1)
-        print( str(level*'-') + str(self.key))
         if self.rightTree != None:
             self.rightTree.printInorder(level+1)
+        print( str(level*'-') + str(self.key))
+        if self.leftTree != None:
+            self.leftTree.printInorder(level+1)
+
 
     def __str__(self):
         return str(self.key)
@@ -54,4 +55,5 @@ if __name__ == '__main__':
     BinaryTree('Section 2.2.1'),
     BinaryTree('Section 2.2.2')) )
     tree = BinaryTree('Contents', leftTree, rightTree)
-    tree.printPreorder(0)
+    # tree.printPreorder(0)
+    print(tree.strPreorder())

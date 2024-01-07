@@ -49,7 +49,7 @@ class Gui:
                         parsed_tree_str = str(parsed_tree)  # Convert the object to a string
                         match = re.search(r'\((\w+)', parsed_tree_str)
                         if match:
-                            #search the storage for the variable
+                            #search the storage for the variable....................................................................
                             variable = match.group(1)
                             if variable in self.storage:
                                 #replace the variable with the value
@@ -63,7 +63,12 @@ class Gui:
                         print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
 
             elif num == 3:
-                print(3)
+                evaloption = input("Please enter variable you want to evaluate:\n")
+                if evaloption in self.storage:
+                    parsed_tree = self.storage[evaloption]
+                    parsed_tree.printExpressionTree(0)
+                else:
+                    print(f"{evaloption}-->None")
             elif num == 4:
                 print(4)
             elif num == 5:
