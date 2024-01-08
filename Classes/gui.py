@@ -38,7 +38,6 @@ class Gui:
                 var = statement[0]
                 statement = statement[2:]
                 tree = ParseTree(statement)
-                tree.build()
                 self.storage[var] = tree
                 input("\n Press enter key to continue...")
 
@@ -49,7 +48,7 @@ class Gui:
                         parsed_tree_str = str(parsed_tree)  # Convert the object to a string
                         match = re.search(r'\((\w+)', parsed_tree_str)
                         if match:
-                            #search the storage for the variable....................................................................
+                            #search the storage for the variable
                             variable = match.group(1)
                             if variable in self.storage:
                                 #replace the variable with the value
@@ -64,9 +63,30 @@ class Gui:
 
             elif num == 3:
                 evaloption = input("Please enter variable you want to evaluate:\n")
+                print('\nExpression Tree:')
+
+
                 if evaloption in self.storage:
                     parsed_tree = self.storage[evaloption]
-                    parsed_tree.printExpressionTree(0)
+                    if parsed_tree.evaluate() is None:
+                            parsed_tree_str = str(parsed_tree)  # Convert the object to a string
+                            match = re.search(r'\((\w+)', parsed_tree_str)
+                            if match:
+                                #search the storage for the variable
+                                variable = match.group(1)
+                                if variable in self.storage:
+                                    #replace the variable with the value
+                                    parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
+                                    #convert the string back to a tree
+                                    parsed_tree_new = ParseTree(parsed_tree_str)
+                                    value = parsed_tree_new.evaluate()
+                                else:
+                                    value = None
+                    else:
+                        value = parsed_tree.evaluate()
+
+                    parsed_tree.printInorder(0)
+                    print(f'Value for "{evaloption}" is {value}')
                 else:
                     print(f"{evaloption}-->None")
             elif num == 4:

@@ -4,6 +4,8 @@ from Stack import Stack
 
 class ParseTree(BinaryTree):
     def __init__(self, expression, storage=None):
+        super().__init__('?')
+        self.expression = expression
         self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\+|\-|\*|\/|\*\*|\(|\)', expression)
         self.current_index = 0
         self.storage = storage or {}
@@ -20,36 +22,41 @@ class ParseTree(BinaryTree):
                 currentTree.insertLeft('?')
                 stack.push(currentTree)
                 currentTree = currentTree.getLeftTree()
+
             elif t in ['+', '-', '*', '/']:
                 currentTree.setKey(t)
                 currentTree.insertRight('?')
                 stack.push(currentTree)
                 currentTree = currentTree.getRightTree()
+
             elif t == ')':
                 currentTree = stack.pop()
+
             elif t not in ['+', '-', '*', '/', ')']:
                 if t.isdigit():
                     currentTree.setKey(int(t))
+    
                 else:
                     currentTree.setKey(t)
+    
                 
                 parent = stack.pop()
                 currentTree = parent
         return tree
 
     def evaluate(self):
-        return self._evaluate_recursive(self.build())
+        return self._evaluate_recursive(self.tree)
 
-    def _evaluate_recursive(self, node):
-        if node is None:
+    def _evaluate_recursive(self, tree):
+        if tree is None:
             return None
 
-        if isinstance(node.getKey(), int):
-            return node.getKey()
+        if isinstance(tree.getKey(), int):
+            return tree.getKey()
 
-        operator = node.getKey()
-        left_value = self._evaluate_recursive(node.getLeftTree())
-        right_value = self._evaluate_recursive(node.getRightTree())
+        operator = tree.getKey()
+        left_value = self._evaluate_recursive(tree.getLeftTree())
+        right_value = self._evaluate_recursive(tree.getRightTree())
 
         if left_value is None or right_value is None:
             return None
@@ -89,9 +96,13 @@ class ParseTree(BinaryTree):
         print( str(level*'-') + str(self.tree.getKey()))
         if leftTree != None:
             leftTree.printInorder(level+1)
+
+    def __str__(self):
+        return self.expression
         
 
 if __name__ == '__main__':
-    tree = ParseTree('(a*(1+2))')
-    print(type(tree))
+    tree = ParseTree('(5*(1+2))')
     tree.printInorder(0)
+    print(tree.evaluate())
+    print(tree)
