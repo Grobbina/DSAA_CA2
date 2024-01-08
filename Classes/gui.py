@@ -35,8 +35,7 @@ class Gui:
                 print("Please choose a valid option\n")
             elif num == 1:
                 statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
-                var = statement[0]
-                statement = statement[2:]
+                var, statement = statement.split('=' , 1)
                 tree = ParseTree(statement)
                 self.storage[var] = tree
                 input("\n Press enter key to continue...")
@@ -90,12 +89,44 @@ class Gui:
                 else:
                     print(f"{evaloption}-->None")
             elif num == 4:
-                print(4)
+                filepath = input("Please enter the input file: ")
+                with open(filepath) as fp:
+                    line = fp.readline()
+                    while line:
+                        line = line.rstrip()
+                        #split the line into variable and statement using '='
+                        var, statement = line.split('=' , 1)
+                        print(statement)
+                        tree = ParseTree(statement)
+                        self.storage[var] = tree
+                        line = fp.readline()
+                print('CURRENT ASSIGNMENTS:')
+                print('*'*10)
+                for var, parsed_tree in self.storage.items():
+                    if parsed_tree.evaluate() is None:
+                        parsed_tree_str = str(parsed_tree)  # Convert the object to a string
+                        match = re.search(r'\((\w+)', parsed_tree_str)
+                        if match:
+                            #search the storage for the variable
+                            variable = match.group(1)
+                            if variable in self.storage:
+                                #replace the variable with the value
+                                parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
+                                #convert the string back to a tree
+                                parsed_tree_new = ParseTree(parsed_tree_str)
+                                print(f"{var}={parsed_tree}-->{parsed_tree_new.evaluate()}")
+                            else:
+                                print(f"{var}={parsed_tree}-->None")
+                    else:
+                        print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
+                input('\nPress enter key, to continue...')
+
             elif num == 5:
                 print(5)
             elif num == 6:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
+    
 
 if __name__ == '__main__':
     gui = Gui()
