@@ -3,10 +3,11 @@ from Classes.BinaryTree import BinaryTree
 from Classes.Stack import Stack
 
 class ParseTree(BinaryTree):
-    def __init__(self, expression, storage=None):
-        super().__init__('?')
+    def init(self, expression, storage=None):
+        super().init('?')
         self.expression = expression
-        self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\+|\-|\*|\/|\*\*|\(|\)', expression)
+        # Use a more specific pattern for '**' to ensure it is treated as a single token
+        self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
