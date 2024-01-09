@@ -19,6 +19,13 @@ class ParseTree(BinaryTree):
         for i in range(len(self.tokens)-1):
             if self.tokens[i].isnumeric() and self.tokens[i+1] == '(':
                 self.tokens.insert(i+1, '*')
+        
+        #check if * or / is followed by a -
+        for i in range(len(self.tokens)-1):
+            if self.tokens[i] in ['*', '/'] and self.tokens[i+1] == '-':
+                self.tokens.insert(i+1, '(')
+                self.tokens.insert(i+3, ')')
+                self.tokens.insert(i+2, '0')
 
         self.current_index = 0
         self.storage = storage or {}
@@ -115,7 +122,7 @@ class ParseTree(BinaryTree):
         
 
 if __name__ == '__main__':
-    tree = ParseTree('(5*(1+2))')
+    tree = ParseTree('((0-((0+0)+2))/1)')
     tree.printInorder(0)
     print(tree.evaluate())
     print(tree)

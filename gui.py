@@ -94,10 +94,11 @@ class Gui:
                 self.sort_assignment_statements(output_name)
 
             elif num == 6:
-                print('Turning safety mode on will prevent you from evaluating cross referenced variables in linear equations\n Turning safety mode off will allow you to evaluate cross referenced variables in linear equations\n')
+                print('Turning safety mode on will prevent you from evaluating cross referenced variables in linear equations\nTurning safety mode off will allow you to evaluate cross referenced variables in linear equations\n')
                 status = 'OFF' if self.safety else 'ON'
+                self.safety = input(f"Toggle safety mode {status}? (y/n): ")
                 while self.safety not in ['y','n',True,False]:
-                    self.safety = input(f"Toggle safety mode {status}? (y/n): ")
+                    self.safety = input(f"INVALID OPTION\nToggle safety mode {status}? (y/n): ")
                 if self.safety == 'y':
                     if status == 'ON':
                         self.safety = True
@@ -133,71 +134,20 @@ class Gui:
 
     #converts expressions to its lowest level form (no vars all numbers)
     def evaluateexpressions(self, dict, level=0):
-<<<<<<< Updated upstream
         if level >len(list(self.storage.keys())):
             print('\nCannot evaluate, error:Reference loop')
             return None
-=======
->>>>>>> Stashed changes
 
-        #prevent infinite loop
-        if self.safety:
-            if level >len(list(self.storage.keys())):
-                print('Cannot evaluate, error:Reference loop')
-                return None
-
-            var = list(dict.keys())[0]
-            parsed_tree = dict[var]
-            if parsed_tree.evaluate() is None:
-                parsed_tree_str = str(parsed_tree)
-                #find all "words" in the expression (variables)
-                match = re.search(r'[a-zA-Z]+', parsed_tree_str)
-                if match:
-                    variable = match.group()
-                    if variable in self.storage:
-                        parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable]))
-                        parsed_tree_new = ParseTree(parsed_tree_str)
-                        print(parsed_tree_new)
-                        #check whether there are more variables to replace
-                        match = re.search(r'[a-zA-Z]+', parsed_tree_str)
-                        if match:
-                            return self.evaluateexpressions({var: parsed_tree_new},level+1)
-                        else:
-                            return parsed_tree_new
-                    
-                    #referenced var doesnt exist, just return None
-                    else:
-                        return None
-            else:
-                return parsed_tree
-            
-        else:
-            #try to solve linear equations using substitution
-            var = list(dict.keys())[0]
-            parsed_tree = dict[var]
+        var = list(dict.keys())[0]
+        parsed_tree = dict[var]
+        if parsed_tree.evaluate() is None:
+            if self.safety == False:
+                var, parsed_tree = self.unsafeevaluation(var, parsed_tree)
+                print(var, parsed_tree)
             parsed_tree_str = str(parsed_tree)
-            #move all variables to left side and all numbers to right side
+            #find all "words" in the expression (variables)
             match = re.search(r'[a-zA-Z]+', parsed_tree_str)
-            #check if the match is the same variable as the one we are trying to solve
-            if match and match.group() == var:
-                variable = match.group()
-                #find the coefficient of the variables in the expression
-
-                pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
-                matches = pattern.findall(parsed_tree_str)
-                coefficients = [int(match) if match else 1 for match in matches]
-
-
-                for match in matches:
-                    equation_str = parsed_tree.replace(match, '')
-
-                # remove the variable itself from the string
-                equation_str = re.sub(r'[a-zA-Z]', '', equation_str)
-
-
-
-            
-            elif match:
+            if match:
                 variable = match.group()
                 if variable in self.storage:
                     parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable]))
@@ -208,11 +158,14 @@ class Gui:
                         return self.evaluateexpressions({var: parsed_tree_new},level+1)
                     else:
                         return parsed_tree_new
+                
                 #referenced var doesnt exist, just return None
                 else:
                     return None
             else:
                 return parsed_tree
+        else:
+            return parsed_tree
             
 
     def simplifyevaluation(self, var, parsed_tree):
@@ -233,9 +186,56 @@ class Gui:
         #divide the equation by the coefficient(add a /8 to the end of the equation)
         equation_str = f'({equation_str}/{coefficient})'
         #parse the equation
-        print(equation_str)
         parsed_tree = ParseTree(equation_str)
         return new_var, parsed_tree
+    
+    
+    def unsafeevaluation(self, var, parsed_tree):
+        parsed_tree_str = str(parsed_tree)
+        #find all "words" in the expression (variables)
+        match = re.findall(r'[a-zA-Z]+', parsed_tree_str)
+        if len(match) == 1 and match[0] == var:
+            #find the coefficient of the variables in the expression
+            pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+            matches = pattern.findall(parsed_tree_str)
+
+            #remove coefficients from the equation before transforming them
+            # for match in matches:
+            #     equation_str = parsed_tree_str.replace(match, '')
+            
+            #fix the coefficients eg no coefficient = 1, - = -1
+            for i in range(len(matches)):
+                if matches[i] == '':
+                    matches[i] = '1'
+                elif matches[i] == '-':
+                    matches[i] = '-1'
+            coefficients = [int(match) if match else 1 for match in matches]
+
+            #remove variables itself from the equation
+
+            parsed_tree_str = re.sub(r'[a-zA-Z]', '(0+0)', parsed_tree_str)
+            
+            #set the new tree to the simplified equation
+            parsed_tree = ParseTree(parsed_tree_str)
+            
+            #sum up equations and get the total coefficient
+            total = 0
+            for coefficient in coefficients:
+                total += int(coefficient)
+
+            #check left var for coefficients and simplify
+            var_coeff = re.search(r'([+-]?\d*)[a-zA-Z]', var)
+            if var_coeff.group(1) != '':
+                var = var.replace(var_coeff.group(1), '')
+                var = f'{total + int(var_coeff.group(1))}{var}'
+                var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
+                return var, parsed_tree
+            else:
+                var = f'{total}{var}'
+                var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
+                return var, parsed_tree
+        else:
+            return var, parsed_tree
 
 
 if __name__ == '__main__':
