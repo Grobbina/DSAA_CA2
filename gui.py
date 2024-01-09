@@ -87,7 +87,11 @@ class Gui:
                 break
 
     #converts expressions to its lowest level form (no vars all numbers)
-    def evaluateexpressions(self, dict):
+    def evaluateexpressions(self, dict, level=0):
+        if level >len(list(self.storage.keys())):
+            print('Cannot evaluate, error:Reference loop')
+            return None
+
         var = list(dict.keys())[0]
         parsed_tree = dict[var]
         if parsed_tree.evaluate() is None:
@@ -102,7 +106,7 @@ class Gui:
                     #check whether there are more variables to replace
                     match = re.search(r'[a-zA-Z]+', parsed_tree_str)
                     if match:
-                        return self.evaluateexpressions({var: parsed_tree_new})
+                        return self.evaluateexpressions({var: parsed_tree_new},level+1)
                     else:
                         return parsed_tree_new
                 
