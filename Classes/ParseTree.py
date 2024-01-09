@@ -1,6 +1,6 @@
 import re
-from BinaryTree import BinaryTree
-from Stack import Stack
+from Classes.BinaryTree import BinaryTree
+from Classes.Stack import Stack
 
 class ParseTree(BinaryTree):
     def __init__(self, expression, storage=None):
@@ -102,6 +102,9 @@ class ParseTree(BinaryTree):
         
 
 if __name__ == '__main__':
+    import re
+    from BinaryTree import BinaryTree
+    from Stack import Stack
     tree = ParseTree('(5*(1+2))')
     tree.printInorder(0)
     print(tree.evaluate())

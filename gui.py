@@ -1,7 +1,7 @@
-from ParseTree import ParseTree
-from Stack import Stack 
-import regex as re
-from BinaryTree import BinaryTree
+from Classes.ParseTree import ParseTree
+from Classes.Stack import Stack 
+import re
+from Classes.BinaryTree import BinaryTree
 
 def starty():
     input("""
@@ -17,10 +17,6 @@ def starty():
     Press Enter to continue...
     """)
 starty()
-
-#Main Gui
-from ParseTree import ParseTree
-from Stack import Stack
 
 class Gui:
     def __init__(self):
