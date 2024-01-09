@@ -8,6 +8,18 @@ class ParseTree(BinaryTree):
         self.expression = expression
         # Use a more specific pattern for '**' to ensure it is treated as a single token
         self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
+        #if tokens are number followed by variable, add a * between them
+        for i in range(len(self.tokens)-1):
+            if self.tokens[i].isnumeric() and self.tokens[i+1].isalpha():
+                self.tokens.insert(i+1, '*')
+                #insert brackets as well 
+                self.tokens.insert(i-1, '(')
+                self.tokens.insert(i+4, ')')
+        #if number is followed by opening bracket add a * between them
+        for i in range(len(self.tokens)-1):
+            if self.tokens[i].isnumeric() and self.tokens[i+1] == '(':
+                self.tokens.insert(i+1, '*')
+
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()

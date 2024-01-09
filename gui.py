@@ -21,19 +21,28 @@ starty()
 class Gui:
     def __init__(self):
         self.storage = {}
+        self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Exit")
+            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Exit\n")
 
             num = int(input("Enter choice:"))
 
-            if num <= 0 or num > 6:
+            if num <= 0 or num > 7:
                 print("Please choose a valid option\n")
             elif num == 1:
                 statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
                 var, statement = statement.split('=' , 1)
                 tree = ParseTree(statement)
                 self.storage[var] = tree
+                #check variable for coefficients
+                pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+                # Find all matches in the string
+                matches = pattern.findall(var)
+                if matches[0] != '':
+                    var, statement = self.simplifyevaluation(var, tree)
+                    #add the simplified equation to the storage
+                    self.storage[var] = statement
                 input("\n Press enter key to continue...")
 
             elif num == 2:
@@ -85,6 +94,18 @@ class Gui:
                 self.sort_assignment_statements(output_name)
 
             elif num == 6:
+                print('Turning safety mode on will prevent you from evaluating cross referenced variables in linear equations\n Turning safety mode off will allow you to evaluate cross referenced variables in linear equations\n')
+                status = 'OFF' if self.safety else 'ON'
+                while self.safety not in ['y','n',True,False]:
+                    self.safety = input(f"Toggle safety mode {status}? (y/n): ")
+                if self.safety == 'y':
+                    if status == 'ON':
+                        self.safety = True
+                    else:
+                        self.safety = False
+                else:
+                    pass
+            elif num == 7:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
 
@@ -112,17 +133,71 @@ class Gui:
 
     #converts expressions to its lowest level form (no vars all numbers)
     def evaluateexpressions(self, dict, level=0):
+<<<<<<< Updated upstream
         if level >len(list(self.storage.keys())):
             print('\nCannot evaluate, error:Reference loop')
             return None
+=======
+>>>>>>> Stashed changes
 
-        var = list(dict.keys())[0]
-        parsed_tree = dict[var]
-        if parsed_tree.evaluate() is None:
+        #prevent infinite loop
+        if self.safety:
+            if level >len(list(self.storage.keys())):
+                print('Cannot evaluate, error:Reference loop')
+                return None
+
+            var = list(dict.keys())[0]
+            parsed_tree = dict[var]
+            if parsed_tree.evaluate() is None:
+                parsed_tree_str = str(parsed_tree)
+                #find all "words" in the expression (variables)
+                match = re.search(r'[a-zA-Z]+', parsed_tree_str)
+                if match:
+                    variable = match.group()
+                    if variable in self.storage:
+                        parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable]))
+                        parsed_tree_new = ParseTree(parsed_tree_str)
+                        print(parsed_tree_new)
+                        #check whether there are more variables to replace
+                        match = re.search(r'[a-zA-Z]+', parsed_tree_str)
+                        if match:
+                            return self.evaluateexpressions({var: parsed_tree_new},level+1)
+                        else:
+                            return parsed_tree_new
+                    
+                    #referenced var doesnt exist, just return None
+                    else:
+                        return None
+            else:
+                return parsed_tree
+            
+        else:
+            #try to solve linear equations using substitution
+            var = list(dict.keys())[0]
+            parsed_tree = dict[var]
             parsed_tree_str = str(parsed_tree)
-            #find all "words" in the expression (variables)
+            #move all variables to left side and all numbers to right side
             match = re.search(r'[a-zA-Z]+', parsed_tree_str)
-            if match:
+            #check if the match is the same variable as the one we are trying to solve
+            if match and match.group() == var:
+                variable = match.group()
+                #find the coefficient of the variables in the expression
+
+                pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+                matches = pattern.findall(parsed_tree_str)
+                coefficients = [int(match) if match else 1 for match in matches]
+
+
+                for match in matches:
+                    equation_str = parsed_tree.replace(match, '')
+
+                # remove the variable itself from the string
+                equation_str = re.sub(r'[a-zA-Z]', '', equation_str)
+
+
+
+            
+            elif match:
                 variable = match.group()
                 if variable in self.storage:
                     parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable]))
@@ -133,13 +208,35 @@ class Gui:
                         return self.evaluateexpressions({var: parsed_tree_new},level+1)
                     else:
                         return parsed_tree_new
-                
                 #referenced var doesnt exist, just return None
                 else:
                     return None
-        else:
-            return parsed_tree
-    
+            else:
+                return parsed_tree
+            
+
+    def simplifyevaluation(self, var, parsed_tree):
+        #check var for coefficients
+        pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+        # Find all matches in the string
+        matches = pattern.findall(var)
+        # Remove the variables and their coefficients from the string
+        for match in matches:
+            new_var = var.replace(match, '')
+
+        #add all the coefficients together
+        coefficient = 0
+        for match in matches:
+            coefficient += int(match)
+        #remove the variable itself from the string
+        equation_str = str(parsed_tree)
+        #divide the equation by the coefficient(add a /8 to the end of the equation)
+        equation_str = f'({equation_str}/{coefficient})'
+        #parse the equation
+        print(equation_str)
+        parsed_tree = ParseTree(equation_str)
+        return new_var, parsed_tree
+
 
 if __name__ == '__main__':
     gui = Gui()
