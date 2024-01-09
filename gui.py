@@ -36,13 +36,24 @@ class Gui:
                 tree = ParseTree(statement)
                 self.storage[var] = tree
                 #check variable for coefficients
-                pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+                pattern = re.compile(r'([+-]?\d*)[a-zA-Z]+')
                 # Find all matches in the string
                 matches = pattern.findall(var)
+
+                #check if there are coefficients in the variable, if there is we try to process it to be something like 1var = equation
                 if matches[0] != '':
+                    #check if there is only 1 variable in the left side of the equation
+
+                    if len(matches) != 1:
+                        #if there are more than 1 variable in the left side of the equation, we try to process it to be something like 1var = equation
+                        var, statement = self.VarExtraction(var, statement, len(matches))
+                        tree = ParseTree(f'({statement})')
                     var, statement = self.simplifyevaluation(var, tree)
                     #add the simplified equation to the storage
                     self.storage[var] = statement
+                    
+
+
                 input("\n Press enter key to continue...")
 
             elif num == 2:
@@ -170,7 +181,7 @@ class Gui:
 
     def simplifyevaluation(self, var, parsed_tree):
         #check var for coefficients
-        pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+        pattern = re.compile(r'([+-]?\d*\.?\d+)?[a-zA-Z]+')
         # Find all matches in the string
         matches = pattern.findall(var)
         # Remove the variables and their coefficients from the string
@@ -180,7 +191,10 @@ class Gui:
         #add all the coefficients together
         coefficient = 0
         for match in matches:
-            coefficient += int(match)
+            if match == '':
+                match = '0'
+            coefficient += float(match)
+
         #remove the variable itself from the string
         equation_str = str(parsed_tree)
         #divide the equation by the coefficient(add a /8 to the end of the equation)
@@ -196,7 +210,7 @@ class Gui:
         match = re.findall(r'[a-zA-Z]+', parsed_tree_str)
         if len(match) == 1 and match[0] == var:
             #find the coefficient of the variables in the expression
-            pattern = re.compile(r'([+-]?\d*)[a-zA-Z]')
+            pattern = re.compile(r'([+-]?\d*)[a-zA-Z]+')
             matches = pattern.findall(parsed_tree_str)
 
             #remove coefficients from the equation before transforming them
@@ -209,11 +223,30 @@ class Gui:
                     matches[i] = '1'
                 elif matches[i] == '-':
                     matches[i] = '-1'
-            coefficients = [int(match) if match else 1 for match in matches]
+            coefficients = [float(match) if match else 1 for match in matches]
+            #remove the coefficients from the equation
+            for match in matches:
+                temp = parsed_tree_str.replace(f'{match}{var}', var)
+
+            temptree = ParseTree(temp)
+            #add a part here to find all * and / modifiers for each coefficient and resolve them
+            #OK (LOL i am the one who wrote both of these comments )
+            tokens = temptree.tokens
+            match = re.findall(r'([*/])', parsed_tree_str)
+            for i in range(len(tokens)-1):
+                if tokens[i] in ['*', '/']:
+                    if tokens[i] == '*':
+                        print(f'Multiplying {coefficients} by {tokens[i-1]}')
+                        coefficients = list(map(lambda x: x * float(tokens[i-1]), coefficients))
+                    elif tokens[i] == '/':
+                        print(f'Dividing {coefficients} by {tokens[i+1]}')
+                        coefficients = list(map(lambda x: x / float(tokens[i+1]), coefficients))
+            print(coefficients)
+
 
             #remove variables itself from the equation
 
-            parsed_tree_str = re.sub(r'[a-zA-Z]', '(0+0)', parsed_tree_str)
+            parsed_tree_str = re.sub(r'[a-zA-Z]+', '(0+0)', parsed_tree_str)
             
             #set the new tree to the simplified equation
             parsed_tree = ParseTree(parsed_tree_str)
@@ -221,22 +254,56 @@ class Gui:
             #sum up equations and get the total coefficient
             total = 0
             for coefficient in coefficients:
-                total += int(coefficient)
+                total += float(coefficient)
 
             #check left var for coefficients and simplify
-            var_coeff = re.search(r'([+-]?\d*)[a-zA-Z]', var)
+            var_coeff = re.search(r'([+-]?\d*)[a-zA-Z]+', var)
             if var_coeff.group(1) != '':
                 var = var.replace(var_coeff.group(1), '')
-                var = f'{total + int(var_coeff.group(1))}{var}'
+                var = f'{total + float(var_coeff.group(1))}{var}'
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
                 return var, parsed_tree
             else:
-                var = f'{total}{var}'
+                var = f'{1+total}{var}'
+                print(var, parsed_tree)
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
                 return var, parsed_tree
         else:
             return var, parsed_tree
+    
 
+    def VarExtraction(self, var, statement, no_Of_Vars=0):
+        #find all "words" in the var side of the equation (variables)
+        match = re.findall(r'[a-zA-Z]+', var)
+        #if there is only 1 variable in the var side of the equation
+        if len(match) == 1:
+            return var, statement
+        else:
+            for i in range(no_Of_Vars-1):
+                match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', var)
+                tokeep = match.group()
+                tomove = var.replace(tokeep, '')
+                #check if the variables are already in the storage, if it is, we use another variable to store the equation, 
+                #if all variables are, replace the last variable in storage with the equation
+                for i in range(no_Of_Vars-1):
+                    #check if tokeep is already in storage
+                    match = re.search(r'[a-zA-Z]+', tokeep)
+                    if match.group() in self.storage:
+                        print('finding new variable')
+                        #if it is, we use another variable to store the equation
+                        match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', tomove)
+                        tokeep = match.group()
+                        print('Using', tokeep, 'to store equation')
+                        tomove = var.replace(tokeep, '')
+                    else:
+                        break
+                #add a 0 to the front of the equation
+                if tomove[0] in ['+', '-']:
+                    tomove = f'0{tomove}'
+                print(tomove)
+                #move to the right side of the equation
+                statement = f'{statement}-({tomove})'
+                return tokeep, statement
 
 if __name__ == '__main__':
     gui = Gui()

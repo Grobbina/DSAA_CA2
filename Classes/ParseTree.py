@@ -1,6 +1,6 @@
 import re
-from Classes.BinaryTree import BinaryTree
-from Classes.Stack import Stack
+from BinaryTree import BinaryTree
+from Stack import Stack
 
 class ParseTree(BinaryTree):
     def __init__(self, expression, storage=None):
@@ -13,7 +13,7 @@ class ParseTree(BinaryTree):
             if self.tokens[i].isnumeric() and self.tokens[i+1].isalpha():
                 self.tokens.insert(i+1, '*')
                 #insert brackets as well 
-                self.tokens.insert(i-1, '(')
+                self.tokens.insert(i, '(')
                 self.tokens.insert(i+4, ')')
         #if number is followed by opening bracket add a * between them
         for i in range(len(self.tokens)-1):
@@ -26,7 +26,7 @@ class ParseTree(BinaryTree):
                 self.tokens.insert(i+1, '(')
                 self.tokens.insert(i+3, ')')
                 self.tokens.insert(i+2, '0')
-
+        print(self.tokens)
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
@@ -122,7 +122,7 @@ class ParseTree(BinaryTree):
         
 
 if __name__ == '__main__':
-    tree = ParseTree('((0-((0+0)+2))/1)')
+    tree = ParseTree('(0+3((20-(2(0+0)))/3.0))')
     tree.printInorder(0)
     print(tree.evaluate())
     print(tree)
