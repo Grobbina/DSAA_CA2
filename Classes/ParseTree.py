@@ -3,11 +3,11 @@ from Classes.BinaryTree import BinaryTree
 from Classes.Stack import Stack
 
 class ParseTree(BinaryTree):
-    def init(self, expression, storage=None):
-        super().init('?')
+    def __init__(self, expression, storage=None):
+        super().__init__('?')
         self.expression = expression
         # Use a more specific pattern for '**' to ensure it is treated as a single token
-        self.tokens = re.findall(r'\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
+        self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
@@ -24,7 +24,7 @@ class ParseTree(BinaryTree):
                 stack.push(currentTree)
                 currentTree = currentTree.getLeftTree()
 
-            elif t in ['+', '-', '*', '/']:
+            elif t in ['+', '-', '*', '/', '**']:
                 currentTree.setKey(t)
                 currentTree.insertRight('?')
                 stack.push(currentTree)
@@ -33,12 +33,12 @@ class ParseTree(BinaryTree):
             elif t == ')':
                 currentTree = stack.pop()
 
-            elif t not in ['+', '-', '*', '/', ')']:
-                if t.isdigit():
-                    currentTree.setKey(int(t))
-    
-                else:
+            elif t not in ['+', '-', '*', '/', ')','**']:
+                if t.isalpha():
                     currentTree.setKey(t)
+                else:
+                    currentTree.setKey(float(t))
+                
     
                 
                 parent = stack.pop()
@@ -52,7 +52,7 @@ class ParseTree(BinaryTree):
         if tree is None:
             return None
 
-        if isinstance(tree.getKey(), int):
+        if isinstance(tree.getKey(), float):
             return tree.getKey()
 
         operator = tree.getKey()
@@ -103,9 +103,6 @@ class ParseTree(BinaryTree):
         
 
 if __name__ == '__main__':
-    import re
-    from BinaryTree import BinaryTree
-    from Stack import Stack
     tree = ParseTree('(5*(1+2))')
     tree.printInorder(0)
     print(tree.evaluate())

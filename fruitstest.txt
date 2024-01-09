@@ -1,0 +1,3 @@
+Durian=(Apple*Pear)
+Apple=(15*5)
+Pear=(15*Apple)

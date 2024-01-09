@@ -39,47 +39,19 @@ class Gui:
             elif num == 2:
                 print("\nCurrent Assignments:")
                 for var, parsed_tree in self.storage.items():
-                    if parsed_tree.evaluate() is None:
-                        parsed_tree_str = str(parsed_tree)  # Convert the object to a string
-                        match = re.search(r'\((\w+)', parsed_tree_str)
-                        if match:
-                            #search the storage for the variable
-                            variable = match.group(1)
-                            if variable in self.storage:
-                                #replace the variable with the value
-                                parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
-                                #convert the string back to a tree
-                                parsed_tree_new = ParseTree(parsed_tree_str)
-                                print(f"{var}={parsed_tree}-->{parsed_tree_new.evaluate()}")
-                            else:
-                                print(f"{var}={parsed_tree}-->None")
+                    original = parsed_tree
+                    parsed_tree = self.evaluateexpressions({var: parsed_tree})
+                    if parsed_tree is not None:
+                        print(f'{var}={original}-->{parsed_tree.evaluate()}')
                     else:
-                        print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
-
+                        print(f'{var}={original}-->None')
             elif num == 3:
                 evaloption = input("Please enter variable you want to evaluate:\n")
                 print('\nExpression Tree:')
-
-
                 if evaloption in self.storage:
                     parsed_tree = self.storage[evaloption]
-                    if parsed_tree.evaluate() is None:
-                            parsed_tree_str = str(parsed_tree)  # Convert the object to a string
-                            match = re.search(r'\((\w+)', parsed_tree_str)
-                            if match:
-                                #search the storage for the variable
-                                variable = match.group(1)
-                                if variable in self.storage:
-                                    #replace the variable with the value
-                                    parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
-                                    #convert the string back to a tree
-                                    parsed_tree_new = ParseTree(parsed_tree_str)
-                                    value = parsed_tree_new.evaluate()
-                                else:
-                                    value = None
-                    else:
-                        value = parsed_tree.evaluate()
-
+                    parsed_tree = self.evaluateexpressions({evaloption: parsed_tree})
+                    value = parsed_tree.evaluate()
                     parsed_tree.printInorder(0)
                     print(f'Value for "{evaloption}" is {value}')
                 else:
@@ -92,29 +64,20 @@ class Gui:
                         line = line.rstrip()
                         #split the line into variable and statement using '='
                         var, statement = line.split('=' , 1)
-                        print(statement)
                         tree = ParseTree(statement)
                         self.storage[var] = tree
                         line = fp.readline()
                 print('CURRENT ASSIGNMENTS:')
                 print('*'*10)
+                self.storage = dict(sorted(self.storage.items(), key=lambda key: key[0]))
                 for var, parsed_tree in self.storage.items():
-                    if parsed_tree.evaluate() is None:
-                        parsed_tree_str = str(parsed_tree)  # Convert the object to a string
-                        match = re.search(r'\((\w+)', parsed_tree_str)
-                        if match:
-                            #search the storage for the variable
-                            variable = match.group(1)
-                            if variable in self.storage:
-                                #replace the variable with the value
-                                parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable].evaluate()))
-                                #convert the string back to a tree
-                                parsed_tree_new = ParseTree(parsed_tree_str)
-                                print(f"{var}={parsed_tree}-->{parsed_tree_new.evaluate()}")
-                            else:
-                                print(f"{var}={parsed_tree}-->None")
+                    original = parsed_tree
+                    parsed_tree = self.evaluateexpressions({var: parsed_tree})
+                    if parsed_tree is not None:
+                        print(f'{var}={original}-->{parsed_tree.evaluate()}')
                     else:
-                        print(f"{var}={parsed_tree}-->{parsed_tree.evaluate()}")
+                        print(f'{var}={original}-->None')
+                    
                 input('\nPress enter key, to continue...')
 
             elif num == 5:
@@ -122,6 +85,32 @@ class Gui:
             elif num == 6:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
+
+    #converts expressions to its lowest level form (no vars all numbers)
+    def evaluateexpressions(self, dict):
+        var = list(dict.keys())[0]
+        parsed_tree = dict[var]
+        if parsed_tree.evaluate() is None:
+            parsed_tree_str = str(parsed_tree)
+            #find all "words" in the expression (variables)
+            match = re.search(r'[a-zA-Z]+', parsed_tree_str)
+            if match:
+                variable = match.group()
+                if variable in self.storage:
+                    parsed_tree_str = parsed_tree_str.replace(variable, str(self.storage[variable]))
+                    parsed_tree_new = ParseTree(parsed_tree_str)
+                    #check whether there are more variables to replace
+                    match = re.search(r'[a-zA-Z]+', parsed_tree_str)
+                    if match:
+                        return self.evaluateexpressions({var: parsed_tree_new})
+                    else:
+                        return parsed_tree_new
+                
+                #referenced var doesnt exist, just return None
+                else:
+                    return None
+        else:
+            return parsed_tree
     
 
 if __name__ == '__main__':
