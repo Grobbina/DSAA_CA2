@@ -42,9 +42,9 @@ class Gui:
                     original = parsed_tree
                     parsed_tree = self.evaluateexpressions({var: parsed_tree})
                     if parsed_tree is not None:
-                        print(f'{var}={original}-->{parsed_tree.evaluate()}')
+                        print(f'{var}={original}-->{parsed_tree.evaluate()}\n')
                     else:
-                        print(f'{var}={original}-->None')
+                        print(f'{var}={original}-->None\n')
             elif num == 3:
                 evaloption = input("Please enter variable you want to evaluate:\n")
                 print('\nExpression Tree:')
@@ -81,15 +81,39 @@ class Gui:
                 input('\nPress enter key, to continue...')
 
             elif num == 5:
-                print(5)
+                output_name = input("Enter the output name: ")
+                self.sort_assignment_statements(output_name)
+
             elif num == 6:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
 
+    def sort_assignment_statements(self, output_name):
+        sorted_statements = {}
+
+        for var, parsed_tree in self.storage.items():
+            original = parsed_tree
+            parsed_tree = self.evaluateexpressions({var: parsed_tree})
+            value = parsed_tree.evaluate() if parsed_tree is not None else 'None'
+
+            if value not in sorted_statements:
+                sorted_statements[value] = []
+
+            sorted_statements[value].append(f'{var}={original}')
+
+        with open(output_name, 'w') as output_file:
+            for value, statements in sorted_statements.items():
+                output_file.write(f'*** Statements with value => {value}\n')
+                for statement in statements:
+                    output_file.write(f'{statement}\n')
+
+        print(f"Sorted content has been written to {output_name}")
+
+
     #converts expressions to its lowest level form (no vars all numbers)
     def evaluateexpressions(self, dict, level=0):
         if level >len(list(self.storage.keys())):
-            print('Cannot evaluate, error:Reference loop')
+            print('\nCannot evaluate, error:Reference loop')
             return None
 
         var = list(dict.keys())[0]
