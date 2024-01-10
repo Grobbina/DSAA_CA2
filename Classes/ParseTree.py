@@ -1,4 +1,5 @@
 import re
+import turtle
 from Classes.BinaryTree import BinaryTree
 from Classes.Stack import Stack
 
@@ -116,6 +117,62 @@ class ParseTree(BinaryTree):
         if leftTree != None:
             leftTree.printInorder(level+1)
 
+    def display_tree_turtle(self):
+        screen = turtle.Screen()
+        screen.title("Parse Tree Visualization")
+        screen.bgcolor("white")
+
+        t = turtle.Turtle()
+        t.speed(2)  # You can adjust the speed as needed
+        t.color("black")
+        t.pensize(2)
+
+        # Set the starting position for drawing the parse tree
+        starting_position = (-50, 200)
+        t.penup()
+        t.goto(starting_position)
+        t.pendown()
+
+        # Draw the parse tree recursively
+        self._display_tree_turtle_recursive(self.tree, t, starting_position, 300)
+
+        turtle.done()
+
+    def _display_tree_turtle_recursive(self, tree, t, position, distance):
+        if tree is not None:
+            key = str(tree.getKey())
+            t.penup()
+            t.goto(position)
+            t.pendown()
+
+            # Draw the current node
+            t.circle(20)
+            t.penup()
+            t.goto(position[0], position[1] - 20)
+            t.pendown()
+            t.write(key, align="center", font=("Arial", 12, "normal"))
+
+            # Draw left subtree
+            if tree.getLeftTree() is not None:
+                new_position = (position[0] - distance, position[1] - 60)
+                self._display_tree_turtle_recursive(tree.getLeftTree(), t, new_position, distance / 2)
+
+                # Draw the connecting line
+                t.penup()
+                t.goto(position[0] - 20, position[1] - 20)
+                t.pendown()
+                t.goto(new_position[0] + 20, new_position[1] + 20)
+
+            # Draw right subtree
+            if tree.getRightTree() is not None:
+                new_position = (position[0] + distance, position[1] - 60)
+                self._display_tree_turtle_recursive(tree.getRightTree(), t, new_position, distance / 2)
+
+                # Draw the connecting line
+                t.penup()
+                t.goto(position[0] + 20, position[1] - 20)
+                t.pendown()
+                t.goto(new_position[0] - 20, new_position[1] + 20)
     def __str__(self):
         return self.expression
         

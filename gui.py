@@ -1,6 +1,7 @@
 from Classes.ParseTree import ParseTree
 from Classes.Stack import Stack 
 import re
+import turtle
 from Classes.BinaryTree import BinaryTree
 
 def starty():
@@ -24,11 +25,11 @@ class Gui:
         self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Exit\n")
+            print("Please select your choice (1,2,3,4,5,6,7,8):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree \t8. Exit\n")
 
             num = int(input("Enter choice:"))
 
-            if num <= 0 or num > 7:
+            if num <= 0 or num > 8:
                 print("Please choose a valid option\n")
             elif num == 1:
                 statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
@@ -118,8 +119,46 @@ class Gui:
                 else:
                     pass
             elif num == 7:
+                expression_choice = input("Enter the variable name to visualize its expression: ")
+                if expression_choice in self.storage:
+                    self.draw_parse_tree(str(self.storage[expression_choice]))
+                else:
+                    print("Invalid variable choice.")
+                    
+            elif num == 8:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
+    
+    def draw_parse_tree(self, expression):
+        parsed_tree = ParseTree(expression, self.storage)
+        self._visualize_tree(parsed_tree.tree)
+
+    def _visualize_tree(self, tree):
+        screen = turtle.Screen()
+        screen.title("Parse Tree Visualization")
+        screen.setup(width=800, height=600)
+
+        turtle.speed(0)
+        turtle.up()
+        turtle.left(90)
+        turtle.backward(300)
+        turtle.down()
+
+        self._draw_tree_recursive(tree, 300, 40)
+        turtle.done()
+
+    def _draw_tree_recursive(self, tree, distance, angle):
+        if tree is not None:
+            turtle.forward(distance)
+            turtle.write(str(tree.getKey()), align="center", font=("Arial", 12, "normal"))
+            turtle.backward(distance)
+
+            angle /= 2
+            turtle.left(angle)
+            self._draw_tree_recursive(tree.getLeftTree(), distance / 2, angle)
+            turtle.right(angle * 2)
+            self._draw_tree_recursive(tree.getRightTree(), distance / 2, angle)
+            turtle.left(angle)
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
@@ -327,6 +366,7 @@ class Gui:
                 #evaluate the 'numeric' part of the equation
                 matchnumbers = re.findall(r'([+-]?\d*\.?\d+)', statement)
                 return tokeep, statement
+    
 
 if __name__ == '__main__':
     gui = Gui()
