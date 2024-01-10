@@ -1,6 +1,6 @@
 import re
-from BinaryTree import BinaryTree
-from Stack import Stack
+from Classes.BinaryTree import BinaryTree
+from Classes.Stack import Stack
 
 class ParseTree(BinaryTree):
     def __init__(self, expression, storage=None):
@@ -20,12 +20,11 @@ class ParseTree(BinaryTree):
             if self.tokens[i].isnumeric() and self.tokens[i+1] == '(':
                 self.tokens.insert(i+1, '*')
         
-        #check if * or / is followed by a -
+        #check for negatives 
         for i in range(len(self.tokens)-1):
-            if self.tokens[i] in ['*', '/'] and self.tokens[i+1] == '-':
-                self.tokens.insert(i+1, '(')
-                self.tokens.insert(i+3, ')')
-                self.tokens.insert(i+2, '0')
+            if self.tokens[i] in ['*', '/', '+', '-', '(',')'] and self.tokens[i+1] == '-':
+                del self.tokens[i+1]
+                self.tokens[i+2] = f'-{self.tokens[i+2]}'
         print(self.tokens)
         self.current_index = 0
         self.storage = storage or {}

@@ -1,3 +1,9 @@
-test1 = [2,5,6]
-test1 *= 3
-print(test1)
+import re 
+
+parsed_tree_str = '50-3x'
+
+
+pattern = re.compile(r'([+-]?\d*)[a-zA-Z]+')
+matches = pattern.findall(parsed_tree_str)
+
+print(matches)

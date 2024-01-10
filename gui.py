@@ -225,22 +225,39 @@ class Gui:
                     matches[i] = '-1'
             coefficients = [float(match) if match else 1 for match in matches]
             #remove the coefficients from the equation
+            print(coefficients)
             for match in matches:
+                #remove the + and - from the coefficient
+                onlynumber = re.search('\d+', match)
+                match = onlynumber.group()
                 temp = parsed_tree_str.replace(f'{match}{var}', var)
-
+            print('replace' , parsed_tree_str)
             temptree = ParseTree(temp)
             #add a part here to find all * and / modifiers for each coefficient and resolve them
             #OK (LOL i am the one who wrote both of these comments )
+            print(temptree)
             tokens = temptree.tokens
             match = re.findall(r'([*/])', parsed_tree_str)
             for i in range(len(tokens)-1):
+                previousoperator = ''
+                if tokens[i] in ['+', '-']:
+                    previousoperator = tokens[i]
                 if tokens[i] in ['*', '/']:
                     if tokens[i] == '*':
-                        print(f'Multiplying {coefficients} by {tokens[i-1]}')
-                        coefficients = list(map(lambda x: x * float(tokens[i-1]), coefficients))
+                        #check for coefficient of token
+                        if previousoperator == '-' :
+                            multiplier = float(f'-{tokens[i-1]}')
+                        else:
+                            multiplier = tokens[i-1]
+                        print(f'Multiplying {coefficients} by {multiplier}')
+                        coefficients = list(map(lambda x: x * float(multiplier), coefficients))
                     elif tokens[i] == '/':
-                        print(f'Dividing {coefficients} by {tokens[i+1]}')
-                        coefficients = list(map(lambda x: x / float(tokens[i+1]), coefficients))
+                        if previousoperator == '-':
+                            multiplier = float(f'-{tokens[i+2]}')
+                        else:
+                            multiplier = tokens[i+1]
+                        print(f'Dividing {coefficients} by {multiplier}')
+                        coefficients = list(map(lambda x: x / float(multiplier), coefficients))
             print(coefficients)
 
 
@@ -266,6 +283,7 @@ class Gui:
             else:
                 var = f'{1+total}{var}'
                 print(var, parsed_tree)
+                print(parsed_tree)
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
                 return var, parsed_tree
         else:
@@ -300,7 +318,6 @@ class Gui:
                 #add a 0 to the front of the equation
                 if tomove[0] in ['+', '-']:
                     tomove = f'0{tomove}'
-                print(tomove)
                 #move to the right side of the equation
                 statement = f'{statement}-({tomove})'
                 return tokeep, statement
