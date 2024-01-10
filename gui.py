@@ -25,7 +25,7 @@ class Gui:
         self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6,7,8):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree \t8. Exit\n")
+            print("Please select your choice (1,2,3,4,5,6,7,8):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree\n \t8. Exit\n")
 
             num = int(input("Enter choice:"))
 
@@ -124,7 +124,7 @@ class Gui:
                     self.draw_parse_tree(str(self.storage[expression_choice]))
                 else:
                     print("Invalid variable choice.")
-                    
+                input("\n Press enter key to continue...")  
             elif num == 8:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
@@ -159,6 +159,8 @@ class Gui:
             turtle.right(angle * 2)
             self._draw_tree_recursive(tree.getRightTree(), distance / 2, angle)
             turtle.left(angle)
+    
+  
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}

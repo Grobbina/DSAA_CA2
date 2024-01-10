@@ -133,6 +133,7 @@ class ParseTree(BinaryTree):
         print( str(level*'-') + str(self.tree.getKey()))
         if leftTree != None:
             leftTree.printInorder(level+1)
+
     def display_tree_turtle(self):
         screen = turtle.Screen()
         screen.title("Parse Tree Visualization")
@@ -190,6 +191,8 @@ class ParseTree(BinaryTree):
                 t.pendown()
                 t.goto(new_position[0] - 20, new_position[1] + 20)
     #write a function to check if a string is digit, accepts negatives as well
+                
+    
     def is_digit_neg(self, n: str) -> bool:
         try:
             int(n)
