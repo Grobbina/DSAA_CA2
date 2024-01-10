@@ -193,7 +193,6 @@ class Gui:
         if parsed_tree.evaluate() is None:
             if self.safety == False:
                 var, parsed_tree = self.unsafeevaluation(var, parsed_tree)
-                print(var, parsed_tree)
             parsed_tree_str = str(parsed_tree)
             #find all "words" in the expression (variables)
             match = re.search(r'[a-zA-Z]+', parsed_tree_str)
@@ -252,56 +251,35 @@ class Gui:
             pattern = re.compile(r'([+-]?\d*)[a-zA-Z]+')
             matches = pattern.findall(parsed_tree_str)
 
-            #remove coefficients from the equation before transforming them
-            # for match in matches:
-            #     equation_str = parsed_tree_str.replace(match, '')
-            
             #fix the coefficients eg no coefficient = 1, - = -1
             for i in range(len(matches)):
                 if matches[i] == '':
                     matches[i] = '1'
                 elif matches[i] == '-':
                     matches[i] = '-1'
-            coefficients = [float(match) if match else 1 for match in matches]
-            #remove the coefficients from the equation
-            print(coefficients)
-            for match in matches:
-                #remove the + and - from the coefficient
-                onlynumber = re.search('\d+', match)
-                match = onlynumber.group()
-                temp = parsed_tree_str.replace(f'{match}{var}', var)
-            print('replace' , parsed_tree_str)
-            temptree = ParseTree(temp)
+            coefficients = [1]
             #add a part here to find all * and / modifiers for each coefficient and resolve them
             #OK (LOL i am the one who wrote both of these comments )
-            print(temptree)
-            tokens = temptree.tokens
+            tokens = parsed_tree.tokens
             match = re.findall(r'([*/])', parsed_tree_str)
             previousoperator = ''
             for i in range(len(tokens)-1):
-                print(tokens[i])
                 if tokens[i] in ['+', '-']:
                     previousoperator = tokens[i]
-                    print('operator',previousoperator)
                 if tokens[i] in ['*', '/']:
                     if tokens[i] == '*':
                         #check for coefficient of token
-                        print(f'Checking for coefficient of {tokens[i-1]}')
-                        print('previous operator', previousoperator)
                         if previousoperator == '-' :
                             multiplier = float(f'-{tokens[i-1]}')
                         else:
                             multiplier = tokens[i-1]
-                        print(f'Multiplying {coefficients} by {multiplier}')
                         coefficients = list(map(lambda x: x * float(multiplier), coefficients))
                     elif tokens[i] == '/':
                         if tokens[i+1] == '-':
                             multiplier = float(f'-{tokens[i+2]}')
                         else:
                             multiplier = tokens[i+1]
-                        print(f'Dividing {coefficients} by {multiplier}')
                         coefficients = list(map(lambda x: x / float(multiplier), coefficients))
-            print(coefficients)
 
 
             #remove variables itself from the equation
@@ -325,8 +303,6 @@ class Gui:
                 return var, parsed_tree
             else:
                 var = f'{1-total}{var}'
-                print(var, parsed_tree)
-                print(parsed_tree)
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
                 return var, parsed_tree
         else:
@@ -350,21 +326,25 @@ class Gui:
                     #check if tokeep is already in storage
                     match = re.search(r'[a-zA-Z]+', tokeep)
                     if match.group() in self.storage:
-                        print('finding new variable')
                         #if it is, we use another variable to store the equation
                         match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', tomove)
                         tokeep = match.group()
-                        print('Using', tokeep, 'to store equation')
                         tomove = var.replace(tokeep, '')
                     else:
                         break
                 #add a 0 to the front of the equation
-                if tomove[0] in ['+', '-']:
-                    tomove = f'0{tomove}'
                 #move to the right side of the equation
-                statement = f'{statement}-({tomove})'
+                if tomove[0] == '+':
+                    tomove = tomove.replace('+', '')
+                statement = f'{statement}-{tomove}'
                 #evaluate the 'numeric' part of the equation
-                matchnumbers = re.findall(r'([+-]?\d*\.?\d+)', statement)
+                #extract only numerics not followed by a letter but following a + or - sign
+                matchno = re.findall(r'(\+?-?\d+(?![a-zA-Z]))', statement)
+                evaluated = sum([int(i) for i in matchno])
+                #redefine the statement with the evaluated numerics
+                for match in matchno:
+                    statement = statement.replace(match, '')
+                statement = f'{evaluated}+{statement}'
                 return tokeep, statement
     
 

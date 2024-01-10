@@ -9,24 +9,41 @@ class ParseTree(BinaryTree):
         self.expression = expression
         # Use a more specific pattern for '**' to ensure it is treated as a single token
         self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
+        #check for negatives 
+        loop = len(self.tokens)-1
+        i = 0
+        while loop > 0:
+            if self.tokens[i] in ['*', '/', '(',')'] and self.tokens[i+1] == '-':
+                #check that the next token is a number
+                if self.is_digit_neg(self.tokens[i+2]):
+                    del self.tokens[i+1]
+                    loop -=1
+                    self.tokens[i+1] = f'-{self.tokens[i+1]}'
+                else:
+                    self.tokens[i+1] = f'-1'
+                    self.tokens.insert(i+2, '*')
+                    loop +=1
+            loop -=1
+            i +=1
+
+            if self.tokens[i] == '-' and self.tokens[i+1] == '-':
+                del self.tokens[i]
+                self.tokens[i] = '+'
+                loop -=1
+            if self.tokens[i] == '+' and self.tokens[i+1] == '-':
+                del self.tokens[i]
+                loop -=1
         #if tokens are number followed by variable, add a * between them
         for i in range(len(self.tokens)-1):
-            if self.tokens[i].isnumeric() and self.tokens[i+1].isalpha():
+            if self.is_digit_neg(self.tokens[i]) and self.tokens[i+1].isalpha():
                 self.tokens.insert(i+1, '*')
                 #insert brackets as well 
                 self.tokens.insert(i, '(')
                 self.tokens.insert(i+4, ')')
         #if number is followed by opening bracket add a * between them
         for i in range(len(self.tokens)-1):
-            if self.tokens[i].isnumeric() and self.tokens[i+1] == '(':
+            if self.is_digit_neg(self.tokens[i]) and self.tokens[i+1] == '(':
                 self.tokens.insert(i+1, '*')
-        
-        #check for negatives 
-        for i in range(len(self.tokens)-1):
-            if self.tokens[i] in ['*', '/', '+', '-', '(',')'] and self.tokens[i+1] == '-':
-                del self.tokens[i+1]
-                self.tokens[i+2] = f'-{self.tokens[i+2]}'
-        print(self.tokens)
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
@@ -117,6 +134,7 @@ class ParseTree(BinaryTree):
         if leftTree != None:
             leftTree.printInorder(level+1)
 
+<<<<<<< HEAD
     def display_tree_turtle(self):
         screen = turtle.Screen()
         screen.title("Parse Tree Visualization")
@@ -173,8 +191,21 @@ class ParseTree(BinaryTree):
                 t.goto(position[0] + 20, position[1] - 20)
                 t.pendown()
                 t.goto(new_position[0] - 20, new_position[1] + 20)
+=======
+    #write a function to check if a string is digit, accepts negatives as well
+    def is_digit_neg(self, n: str) -> bool:
+        try:
+            int(n)
+            return True
+        except ValueError:
+         return False
+
+
+>>>>>>> 16111089d8855974727995730d31bd98c8a0210c
     def __str__(self):
         return self.expression
+    
+    
         
 
 if __name__ == '__main__':
