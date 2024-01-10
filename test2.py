@@ -1,9 +1,6 @@
 import re 
 
-parsed_tree_str = '50-3x'
-
-
-pattern = re.compile(r'([+-]?\d*)[a-zA-Z]+')
-matches = pattern.findall(parsed_tree_str)
-
-print(matches)
+statement = '50-3x+50-60'
+#extract only numerics not followed by a letter but following a + or - sign
+matchno = re.findall(r'(?<=[+-])\d+(?![a-zA-Z])', statement)
+print(matchno)

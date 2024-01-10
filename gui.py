@@ -238,13 +238,17 @@ class Gui:
             print(temptree)
             tokens = temptree.tokens
             match = re.findall(r'([*/])', parsed_tree_str)
+            previousoperator = ''
             for i in range(len(tokens)-1):
-                previousoperator = ''
+                print(tokens[i])
                 if tokens[i] in ['+', '-']:
                     previousoperator = tokens[i]
+                    print('operator',previousoperator)
                 if tokens[i] in ['*', '/']:
                     if tokens[i] == '*':
                         #check for coefficient of token
+                        print(f'Checking for coefficient of {tokens[i-1]}')
+                        print('previous operator', previousoperator)
                         if previousoperator == '-' :
                             multiplier = float(f'-{tokens[i-1]}')
                         else:
@@ -252,7 +256,7 @@ class Gui:
                         print(f'Multiplying {coefficients} by {multiplier}')
                         coefficients = list(map(lambda x: x * float(multiplier), coefficients))
                     elif tokens[i] == '/':
-                        if previousoperator == '-':
+                        if tokens[i+1] == '-':
                             multiplier = float(f'-{tokens[i+2]}')
                         else:
                             multiplier = tokens[i+1]
@@ -277,11 +281,11 @@ class Gui:
             var_coeff = re.search(r'([+-]?\d*)[a-zA-Z]+', var)
             if var_coeff.group(1) != '':
                 var = var.replace(var_coeff.group(1), '')
-                var = f'{total + float(var_coeff.group(1))}{var}'
+                var = f'{float(var_coeff.group(1))-total}{var}'
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
                 return var, parsed_tree
             else:
-                var = f'{1+total}{var}'
+                var = f'{1-total}{var}'
                 print(var, parsed_tree)
                 print(parsed_tree)
                 var, parsed_tree = self.simplifyevaluation(var, parsed_tree)
@@ -320,6 +324,8 @@ class Gui:
                     tomove = f'0{tomove}'
                 #move to the right side of the equation
                 statement = f'{statement}-({tomove})'
+                #evaluate the 'numeric' part of the equation
+                matchnumbers = re.findall(r'([+-]?\d*\.?\d+)', statement)
                 return tokeep, statement
 
 if __name__ == '__main__':
