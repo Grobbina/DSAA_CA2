@@ -123,6 +123,41 @@ class ParseTree(BinaryTree):
             leftTree.printPreorder(level+1)
         if rightTree != None:
             rightTree.printPreorder(level+1)
+    
+    #premdas
+    def pemdas(self):
+        return self._pemdas_recursive(self.tree)
+
+    def _pemdas_recursive(self, tree):
+        if tree is not None:
+
+            if isinstance(tree.getKey(), float):
+                return tree.getKey()
+
+            operator = tree.getKey()
+
+            # Evaluate left and right subtrees based on PEMDAS rules
+            if operator == '**':
+                left_value = self._pemdas_recursive(tree.getLeftTree())
+                right_value = self._pemdas_recursive(tree.getRightTree())
+                return left_value ** right_value
+            elif operator in ['*', '/']:
+                left_value = self._pemdas_recursive(tree.getLeftTree())
+                right_value = self._pemdas_recursive(tree.getRightTree())
+                if operator == '*':
+                    return left_value * right_value
+                elif operator == '/':
+                    return left_value / right_value
+            elif operator in ['+', '-']:
+                left_value = self._pemdas_recursive(tree.getLeftTree())
+                right_value = self._pemdas_recursive(tree.getRightTree())
+                if operator == '+':
+                    return left_value + right_value
+                elif operator == '-':
+                    return left_value - right_value
+
+            # If it's a variable or a number, return its value
+            return self._get_variable_value(operator, left_value, right_value)
 
     #print expression in order of mathematical operations
     def printInorder(self, level):

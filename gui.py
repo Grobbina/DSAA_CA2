@@ -25,11 +25,11 @@ class Gui:
         self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6,7,8):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree\n \t8. Exit\n")
+            print("Please select your choice (1,2,3,4,5,6,7,8):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree\n \t8.Pemdas\n \t9. Exit\n")
 
             num = int(input("Enter choice:"))
 
-            if num <= 0 or num > 8:
+            if num <= 0 or num > 9:
                 print("Please choose a valid option\n")
             elif num == 1:
                 statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
@@ -125,10 +125,21 @@ class Gui:
                 else:
                     print("Invalid variable choice.")
                 input("\n Press enter key to continue...")  
-            elif num == 8:
+            elif num ==8:
+                self.evaluate_equation_pemdas
+            elif num == 9:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
-    
+            
+    def evaluate_equation_pemdas(self):
+        equation = input("Please enter the equation you want to evaluate using PEMDAS rules:\n")
+        tree = ParseTree(equation)
+        result = tree.pemdas()
+        if result is not None:
+            print(f'Result of the equation "{equation}" using PEMDAS: {result}')
+        else:
+            print(f'Cannot evaluate the equation: {equation}')
+
     def draw_parse_tree(self, expression):
         parsed_tree = ParseTree(expression, self.storage)
         self._visualize_tree(parsed_tree.tree)
@@ -138,11 +149,11 @@ class Gui:
         screen.title("Parse Tree Visualization")
         screen.setup(width=800, height=600)
 
-        turtle.speed(0)
-        turtle.up()
-        turtle.left(90)
-        turtle.backward(300)
-        turtle.down()
+        turtle.speed(0) #Fastest
+        turtle.up() # move without drawing
+        turtle.left(90) #rot 90* to left
+        turtle.backward(300) #move back 300 units
+        turtle.down() # put pen down to start drawing
 
         self._draw_tree_recursive(tree, 300, 40)
         turtle.done()
@@ -150,13 +161,13 @@ class Gui:
     def _draw_tree_recursive(self, tree, distance, angle):
         if tree is not None:
             turtle.forward(distance)
-            turtle.write(str(tree.getKey()), align="center", font=("Arial", 12, "normal"))
-            turtle.backward(distance)
+            turtle.write(str(tree.getKey()), align="center", font=("Arial", 12, "normal")) # write operator/no/alpha
+            turtle.backward(distance) #return to og position
 
-            angle /= 2
-            turtle.left(angle)
+            angle /= 2 #adjust angle for branching
+            turtle.left(angle) # turns left
             self._draw_tree_recursive(tree.getLeftTree(), distance / 2, angle)
-            turtle.right(angle * 2)
+            turtle.right(angle * 2) # turns right by 2x the angle
             self._draw_tree_recursive(tree.getRightTree(), distance / 2, angle)
             turtle.left(angle)
     
