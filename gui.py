@@ -158,19 +158,30 @@ class Gui:
         self._draw_tree_recursive(tree, 300, 40)
         turtle.done()
 
-    def _draw_tree_recursive(self, tree, distance, angle):
+    def _draw_tree_recursive(self, tree, distance, angle, scale_factor=0.8):
         if tree is not None:
             turtle.forward(distance)
-            turtle.write(str(tree.getKey()), align="center", font=("Arial", 12, "normal")) # write operator/no/alpha
-            turtle.backward(distance) #return to og position
+            turtle.write(str(tree.getKey()), align="center", font=("Arial", 12, "normal"))
 
-            angle /= 2 #adjust angle for branching
-            turtle.left(angle) # turns left
-            self._draw_tree_recursive(tree.getLeftTree(), distance / 2, angle)
-            turtle.right(angle * 2) # turns right by 2x the angle
-            self._draw_tree_recursive(tree.getRightTree(), distance / 2, angle)
+            # Check if the key is a variable (contains only alphabetical characters)
+            if isinstance(tree.getKey(), str) and tree.getKey().isalpha():
+                print(tree.getKey())
+                # Branch out for the tree if it's a variable with scaled down distance
+                turtle.left(angle)
+                self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor)
+                turtle.right(angle * 2)
+                self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor)
+                turtle.left(angle)
+                
+            
+            turtle.backward(distance)
+
+            angle /= 2
             turtle.left(angle)
-    
+            self._draw_tree_recursive(tree.getLeftTree(), distance / 2, angle, scale_factor)  # Added scale_factor
+            turtle.right(angle * 2)
+            self._draw_tree_recursive(tree.getRightTree(), distance / 2, -angle, scale_factor)  # Fixed angle sign
+            turtle.left(angle)
   
 
     def sort_assignment_statements(self, output_name):
