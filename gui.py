@@ -181,24 +181,23 @@ class Gui:
 
             # Check if the key is a variable (contains only alphabetical characters)
             if isinstance(tree.getKey(), str) and tree.getKey().isalpha():
-                print(tree.getKey())
-                # Branch out for the tree if it's a variable with scaled down distance
+                # Branch out to the tree for the variable
                 turtle.left(angle)
-                self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor)
+                self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor) # dont work?
                 turtle.right(angle * 2)
-                self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor)
+                self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor) # dont work? , got 2 ? using self.storage.get(tree.getKey())
                 turtle.left(angle)
-                
-            
+
             turtle.backward(distance)
 
             angle /= 2
             turtle.left(angle)
-            self._draw_tree_recursive(tree.getLeftTree(), distance / 2, angle, scale_factor)  # Added scale_factor
+            self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor)
             turtle.right(angle * 2)
-            self._draw_tree_recursive(tree.getRightTree(), distance / 2, -angle, scale_factor)  # Fixed angle sign
+            self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor)
             turtle.left(angle)
-  
+
+
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
