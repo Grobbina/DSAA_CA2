@@ -125,6 +125,7 @@ class Gui:
                 else:
                     print("Invalid variable choice.")
                 input("\n Press enter key to continue...")  
+
             elif num ==8:
                 self.evaluate_equation_pemdas
             elif num == 9:
@@ -145,18 +146,33 @@ class Gui:
         self._visualize_tree(parsed_tree.tree)
 
     def _visualize_tree(self, tree):
-        screen = turtle.Screen()
-        screen.title("Parse Tree Visualization")
-        screen.setup(width=800, height=600)
+        try:
+            screen = turtle.Screen()
+            screen.title("Parse Tree Visualization")
+            screen.setup(width=800, height=600)
 
-        turtle.speed(0) #Fastest
-        turtle.up() # move without drawing
-        turtle.left(90) #rot 90* to left
-        turtle.backward(300) #move back 300 units
-        turtle.down() # put pen down to start drawing
+            turtle.speed(0)  # Fastest
+            turtle.up()  # move without drawing
+            turtle.left(90)  # rot 90* to left
+            turtle.backward(300)  # move back 300 units
+            turtle.down()  # put pen down to start drawing
 
-        self._draw_tree_recursive(tree, 300, 40)
-        turtle.done()
+            self._draw_tree_recursive(tree, 300, 40)
+
+            # Wait for the user to close the turtle graphics window
+            turtle.exitonclick()
+
+            # Close the current turtle graphics window
+            turtle.bye()
+
+            # Create a new turtle instance for the next drawing
+            new_turtle = turtle.Turtle()
+
+            # Reset the turtle state after creating the new turtle instance
+            new_turtle.reset()
+
+        except turtle.Terminator:
+            pass
 
     def _draw_tree_recursive(self, tree, distance, angle, scale_factor=0.8):
         if tree is not None:
