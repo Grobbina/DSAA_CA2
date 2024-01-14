@@ -182,10 +182,17 @@ class Gui:
             # Check if the key is a variable (contains only alphabetical characters)
             if isinstance(tree.getKey(), str) and tree.getKey().isalpha():
                 # Branch out to the tree for the variable
+                if tree.getKey() in self.storage:
+                    # Draw the expression for the variable
+                    turtle.left(angle)
+                    self._draw_tree_recursive(ParseTree(str(self.storage[tree.getKey()])).tree, distance * scale_factor*0.8, angle, scale_factor)
+                    turtle.right(angle)
+
+                # Continue drawing the rest of the tree
                 turtle.left(angle)
-                self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor) # dont work?
+                self._draw_tree_recursive(tree.getLeftTree(), distance * scale_factor, angle, scale_factor)
                 turtle.right(angle * 2)
-                self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor) # dont work? , got 2 ? using self.storage.get(tree.getKey())
+                self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor)
                 turtle.left(angle)
 
             turtle.backward(distance)
@@ -196,6 +203,8 @@ class Gui:
             turtle.right(angle * 2)
             self._draw_tree_recursive(tree.getRightTree(), distance * scale_factor, -angle, scale_factor)
             turtle.left(angle)
+
+
 
 
 
