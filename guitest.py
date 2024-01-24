@@ -58,7 +58,6 @@ class Gui:
 
             elif num == 2:
                 print("\nCurrent Assignments:")
-                print(self.storage)
                 for var, parsed_tree in self.storage.items():
                     original = parsed_tree
                     parsed_tree = self.evaluateexpressions({var: parsed_tree})
@@ -282,7 +281,9 @@ class Gui:
 
 
     def LinearEquation(self, var, statement, varlist):
-        equation2 = input('Linear equation detected, please enter the second equation:\n')
+        equation2 = input(f'Linear equation detected, please enter the second equation to complete a simultaneous equation (if you do not wish to continue with this, leave this input blank):\n')
+        if equation2 == '':
+            return
         var2, statement2 = equation2.split('=' , 1)
         #check if the variables in the 2 equations are the same
         varlist2 = re.findall(r'[a-zA-Z]+', var2)
@@ -325,7 +326,6 @@ class Gui:
             st = ''
             for i in range(len(solution)):
                 st += f'{variables[i]} = {round(solution[i], 2)}\t'
-            print(st)
             choice = ''
             while choice not in ['y','n']:
                 choice = input('Do you want to save the solution?(y/n)\n: ')
