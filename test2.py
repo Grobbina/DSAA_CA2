@@ -1,13 +1,7 @@
-import re 
-from Classes.ParseTree import ParseTree
+import re
 
-statement = '41'
-#extract only numerics not followed by a letter as well as the operator before
-matchno = re.findall(r'(\+?-?\d+(?![a-zA-Z]))', statement)
-print(matchno)
-evaluated = sum([int(i) for i in matchno])
-for match in matchno:
-    statement = statement.replace(match, '')
-statement = f'{evaluated}+{statement}'
-tree = ParseTree(statement)
-print(statement)
+equation = '3x+y+4y+2x'
+
+terms = re.findall(r'([-+]?\s*\d*\s*[a-zA-Z])', equation)
+
+print(''.join(terms))

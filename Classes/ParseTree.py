@@ -44,6 +44,7 @@ class ParseTree(BinaryTree):
         for i in range(len(self.tokens)-1):
             if self.is_digit_neg(self.tokens[i]) and self.tokens[i+1] == '(':
                 self.tokens.insert(i+1, '*')
+        print(self.tokens)
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
