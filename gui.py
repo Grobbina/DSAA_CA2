@@ -120,8 +120,8 @@ class Gui:
                     print("Invalid variable choice.")
                 input("\n Press enter key to continue...")  
 
-            elif num ==8:
-                self.evaluate_equation_pemdas
+            elif num == 8:
+                self.evaluate_equation_pemdas()
             elif num == 9:
                 if self.safety:
                     state = 'Off'
@@ -142,6 +142,8 @@ class Gui:
             elif num == 10:
                 print('\nBye, thanks for using ST150/DSAA Assignment Statements Evaluation & Sorter')
                 break
+            else:
+                print('Invalid Option! Please re-enter.')
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
@@ -421,7 +423,13 @@ class Gui:
                 if tree.getKey() in self.storage:
                     # Draw the expression for the variable
                     turtle.left(angle)
+                    turtle.penup()
+                    turtle.forward(10)
+                    turtle.pendown()
                     self._draw_tree_recursive(ParseTree(str(self.storage[tree.getKey()])).tree, distance * scale_factor*0.8, angle, scale_factor)
+                    turtle.penup()
+                    turtle.backward(10)
+                    turtle.pendown()
                     turtle.right(angle)
 
                 # Continue drawing the rest of the tree
