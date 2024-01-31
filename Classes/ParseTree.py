@@ -124,40 +124,65 @@ class ParseTree(BinaryTree):
         if rightTree != None:
             rightTree.printPreorder(level+1)
     
-    #premdas
+    # PEMDAS logic
     def pemdas(self):
         return self._pemdas_recursive(self.tree)
 
     def _pemdas_recursive(self, tree):
         if tree is not None:
-
             if isinstance(tree.getKey(), float):
                 return tree.getKey()
 
             operator = tree.getKey()
 
             # Evaluate left and right subtrees based on PEMDAS rules
-            if operator == '**':
-                left_value = self._pemdas_recursive(tree.getLeftTree())
-                right_value = self._pemdas_recursive(tree.getRightTree())
+            left_value = self._pemdas_recursive(tree.getLeftTree())
+            right_value = self._pemdas_recursive(tree.getRightTree())
+
+            if left_value is None or right_value is None:
+                return None
+
+            if operator == '*':
+                return left_value * right_value
+            elif operator == '/':
+                return left_value / right_value
+            elif operator == '+':
+                return left_value + right_value
+            elif operator == '-':
+                return left_value - right_value
+            elif operator == '**':
                 return left_value ** right_value
-            elif operator in ['*', '/']:
-                left_value = self._pemdas_recursive(tree.getLeftTree())
-                right_value = self._pemdas_recursive(tree.getRightTree())
-                if operator == '*':
-                    return left_value * right_value
-                elif operator == '/':
-                    return left_value / right_value
-            elif operator in ['+', '-']:
-                left_value = self._pemdas_recursive(tree.getLeftTree())
-                right_value = self._pemdas_recursive(tree.getRightTree())
-                if operator == '+':
-                    return left_value + right_value
-                elif operator == '-':
-                    return left_value - right_value
 
             # If it's a variable or a number, return its value
             return self._get_variable_value(operator, left_value, right_value)
+
+    # Additional method to build a parse tree without brackets
+    @classmethod
+    def build_without_brackets(cls, expression):
+        tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/]', expression)
+        current_index = 0
+        stack = Stack()
+        tree = cls('?')
+        stack.push(tree)
+        current_tree = tree
+
+        for token in tokens:
+            if token in ['+', '-', '*', '/']:
+                current_tree.setKey(token)
+                current_tree.insertRight('?')
+                stack.push(current_tree)
+                current_tree = current_tree.getRightTree()
+
+            elif token not in ['+', '-', '*', '/']:
+                if token.isalpha():
+                    current_tree.setKey(token)
+                else:
+                    current_tree.setKey(float(token))
+
+                parent = stack.pop()
+                current_tree = parent
+
+        return tree
 
     #print expression in order of mathematical operations
     def printInorder(self, level):
@@ -247,3 +272,7 @@ if __name__ == '__main__':
     tree.printInorder(0)
     print(tree.evaluate())
     print(tree)
+    tree_pemdas = ParseTree.build_without_brackets('0+3*20-2*0+0/3.0')
+    tree_pemdas.printInorder(0)
+    print(tree_pemdas.evaluate())
+    print(tree_pemdas)

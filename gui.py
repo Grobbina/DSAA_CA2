@@ -372,12 +372,13 @@ class Gui:
 
     def evaluate_equation_pemdas(self):
         equation = input("Please enter the equation you want to evaluate using PEMDAS rules:\n")
-        tree = ParseTree(equation)
-        result = tree.pemdas()
+        tree_pemdas = ParseTree.build_without_brackets(equation)
+        result = tree_pemdas.pemdas()
         if result is not None:
             print(f'Result of the equation "{equation}" using PEMDAS: {result}')
         else:
             print(f'Cannot evaluate the equation: {equation}')
+
 
     def draw_parse_tree(self, expression):
         parsed_tree = ParseTree(expression, self.storage)
