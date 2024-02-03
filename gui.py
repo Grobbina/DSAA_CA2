@@ -4,6 +4,7 @@ import re
 from Classes.BinaryTree import BinaryTree
 import turtle
 
+
 def starty():
     input("""
     ******************************************************
@@ -121,7 +122,7 @@ class Gui:
                 input("\n Press enter key to continue...")  
 
             elif num == 8:
-                self.evaluate_equation_pemdas()
+                self.perform_matrix_operations()
             elif num == 9:
                 if self.safety:
                     state = 'Off'
@@ -144,6 +145,18 @@ class Gui:
                 break
             else:
                 print('Invalid Option! Please re-enter.')
+    
+    
+    def perform_matrix_operations(self):
+        matrix_expression = input("Enter a matrix equation to evaluate: ")
+        try:
+            tree = ParseTree(matrix_expression)
+            result = tree.evaluate_matrix_expression()
+            print("Result:")
+            print(result)
+        except Exception as e:
+            print(f"Error: {e}")
+
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
@@ -368,16 +381,6 @@ class Gui:
         except:
             print('Cannot solve linear equations')
             pass
-
-
-    def evaluate_equation_pemdas(self):
-        equation = input("Please enter the equation you want to evaluate using PEMDAS rules:\n")
-        tree_pemdas = ParseTree.build_without_brackets(equation)
-        result = tree_pemdas.pemdas()
-        if result is not None:
-            print(f'Result of the equation "{equation}" using PEMDAS: {result}')
-        else:
-            print(f'Cannot evaluate the equation: {equation}')
 
 
     def draw_parse_tree(self, expression):
