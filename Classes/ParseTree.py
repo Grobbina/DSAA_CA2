@@ -10,7 +10,6 @@ class ParseTree(BinaryTree):
         self.expression = expression
         # Use a more specific pattern for '**' to ensure it is treated as a single token
         self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]', expression)
-
         #check for negatives 
         loop = len(self.tokens)-1
         i = 0
@@ -50,53 +49,38 @@ class ParseTree(BinaryTree):
         self.storage = storage or {}
         self.tree = self.build()
 
+     
     def build(self):
-        stack = Stack()
-        tree = BinaryTree('?')
-        stack.push(tree)
-        currentTree = tree
+            stack = Stack()
+            tree = BinaryTree('?')
+            stack.push(tree)
+            currentTree = tree
 
-        for t in self.tokens:
-            if t == '(':
-                currentTree.insertLeft('?')
-                stack.push(currentTree)
-                currentTree = currentTree.getLeftTree()
+            for t in self.tokens:
+                if t == '(':
+                    currentTree.insertLeft('?')
+                    stack.push(currentTree)
+                    currentTree = currentTree.getLeftTree()
 
-            elif t in ['+', '-', '*', '/', '**']:
-                currentTree.setKey(t)
-                currentTree.insertRight('?')
-                stack.push(currentTree)
-                currentTree = currentTree.getRightTree()
-
-            elif t == ')':
-                currentTree = stack.pop()
-            elif t == '[':
-                currentTree.insertLeft('?')
-                stack.push(currentTree)
-                currentTree = currentTree.getLeftTree()
-
-            elif t == ']':
-                currentTree = stack.pop()
-
-            elif ',':
-                currentTree.setKey(',')
-                currentTree.insertRight('?')
-                stack.push(currentTree)
-                currentTree = currentTree.getRightTree()
-
-
-            elif t not in ['+', '-', '*', '/', ')','**']:
-                if t.isalpha():
+                elif t in ['+', '-', '*', '/', '**']:
                     currentTree.setKey(t)
-                else:
-                    currentTree.setKey(float(t))
-            
-                
-    
-                
-                parent = stack.pop()
-                currentTree = parent
-        return tree
+                    currentTree.insertRight('?')
+                    stack.push(currentTree)
+                    currentTree = currentTree.getRightTree()
+
+                elif t == ')':
+                    currentTree = stack.pop()
+
+                elif t not in ['+', '-', '*', '/', ')','**']:
+                    if t.isalpha():
+                        currentTree.setKey(t)
+                    else:
+                        currentTree.setKey(float(t))
+                    parent = stack.pop()
+                    currentTree = parent
+
+                    
+            return tree
 
     def evaluate(self):
         return self._evaluate_recursive(self.tree)
@@ -158,8 +142,7 @@ class ParseTree(BinaryTree):
         return self.expression
 
     
-
-if _name_ == '_main_':
+if __name__ == '_main_':
     tree = ParseTree('(0+3((20-(2(0+0)))/3.0))')
     tree.printInorder(0)
     print(tree.evaluate())

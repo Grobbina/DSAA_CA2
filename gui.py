@@ -3,6 +3,7 @@ from Classes.Stack import Stack
 import re
 from Classes.BinaryTree import BinaryTree
 import turtle
+from Classes.MatrixOperations import MatrixOperations
 
 
 def starty():
@@ -147,16 +148,22 @@ class Gui:
                 print('Invalid Option! Please re-enter.')
     
     
-    def perform_matrix_operations(self):
-        matrix_expression = input("Enter a matrix equation to evaluate: ")
-        try:
-            tree = ParseTree(matrix_expression)
-            result = tree.evaluate_matrix_expression()
-            print("Result:")
-            print(result)
-        except Exception as e:
-            print(f"Error: {e}")
+    
+    def perform_matrix_operations(storage=None):
+        while True:
+            matrix_expression = input("Enter a matrix equation to evaluate (or 'exit' to end): ")
 
+            if matrix_expression.lower() == 'exit':
+                break
+
+            try:
+                matrix_tree = MatrixOperations(matrix_expression, storage)
+                result = matrix_tree.evaluate()
+                storage[matrix_expression] = result  # Store the result of the matrix equation
+                print("Result:")
+                print(result)
+            except Exception as e:
+                print(f"Error: {e}")
 
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
