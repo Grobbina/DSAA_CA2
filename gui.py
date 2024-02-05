@@ -5,6 +5,7 @@ from Classes.BinaryTree import BinaryTree
 import turtle
 #from Classes.MatrixOperations import MatrixOperations
 from Classes.validation import validator
+from Classes.MatrixOperations import MatrixExpressionEvaluator
 validator = validator()
 
 def starty():
@@ -151,7 +152,7 @@ class Gui:
                 input("\n Press enter key to continue...")  
 
             elif num == 8:
-                self.perform_matrix_operations()
+                print('ejool')
             elif num == 9:
                 if self.safety:
                     state = 'Off'
@@ -176,23 +177,22 @@ class Gui:
                 print('Invalid Option! Please re-enter.')
     
     
+    def perform_matrix_operations(self):
+        expression = input("Enter matrix expression (e.g., [[1,2],[3,4]]*[[5,6],[7,8]]): ")
+        try:
+            matrix_evaluator = MatrixExpressionEvaluator(expression)
+            matrix1, matrix2, operator, result = matrix_evaluator.evaluate()
+
+            print("\nMatrix 1:")
+            print(matrix1)
+            print("\nMatrix 2:")
+            print(matrix2)
+            print("\nOperator:", operator)
+            print("\nResult:")
+            print(result)
+        except Exception as e:
+            print(f"Error performing matrix operations: {e}")
     
-    def perform_matrix_operations(storage=None):
-        while True:
-            matrix_expression = input("Enter a matrix equation to evaluate (or 'exit' to end): ")
-
-            if matrix_expression.lower() == 'exit':
-                break
-
-            try:
-                matrix_tree = MatrixOperations(matrix_expression, storage)
-                result = matrix_tree.evaluate()
-                storage[matrix_expression] = result  # Store the result of the matrix equation
-                print("Result:")
-                print(result)
-            except Exception as e:
-                print(f"Error: {e}")
-
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
 
