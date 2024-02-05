@@ -88,6 +88,7 @@ class Gui:
                         print(f'{var}={original}-->{parsed_tree.evaluate()}\n')
                     else:
                         print(f'{var}={original}-->None\n')
+                input("\n Press enter key to continue...")
             elif num == 3:
                 evaloption = input("Please enter variable you want to evaluate:\n")
                 print('\nExpression Tree:')

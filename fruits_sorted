@@ -1,0 +1,17 @@
+*** Statements with value => 15.0
+Apple=(3*5)
+*** Statements with value => 135.5
+Banana=(2*(65.5+2.25))
+Mango=((Apple+(Durian+(Pear*(Blueberry*(Coconut/Strawberry)))))/2)
+*** Statements with value => 16.0
+Blueberry=(Pear+0)
+Pear=(Apple+1)
+Starfruit=(2**4)
+Strawberry=(Pear*1)
+*** Statements with value => None
+Cherry=(Lemon/2)
+Lemon=(Pear+Tangerine)
+*** Statements with value => 1.0
+Coconut=(1+0)
+*** Statements with value => 240.0
+Durian=(Apple*Pear)

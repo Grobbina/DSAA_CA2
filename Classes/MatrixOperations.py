@@ -74,13 +74,3 @@ class MatrixOperation:
 
 
 
-# Example usage:
-input_string_matrix = "[[1,2],[3,4]]*[[5,6],[7,8]]"
-matrix_operation_matrix = MatrixOperation(input_string_matrix)
-result_matrix = matrix_operation_matrix.perform_operation()
-print(result_matrix)
-
-input_string_vector = "[1,2,3]*[4,5,6]"
-matrix_operation_vector = MatrixOperation(input_string_vector)
-result_vector = matrix_operation_vector.perform_operation()
-print(result_vector)
