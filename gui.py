@@ -101,7 +101,8 @@ class Gui:
                 else:
                     print(f"{evaloption}-->None")
             elif num == 4:
-                filepath = ''
+                filepath = input("Please enter the input file: ")
+                filepath = validator.addtxt(filepath)
                 while validator.filevalidation(filepath):
                     filepath = input("Please enter the input file: ")
                     filepath = validator.addtxt(filepath)
