@@ -4,7 +4,8 @@ import re
 from Classes.BinaryTree import BinaryTree
 import turtle
 from Classes.MatrixOperations import MatrixOperations
-
+from Classes.validation import validator
+validator = validator()
 
 def starty():
     input("""
@@ -29,15 +30,33 @@ class Gui:
         self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Linear Equations\n \t7. Turtle draw parseTree\n \t8. Pemdas\n \t9. Toggle Auto Simplification \n\t10. Exit\n")
+            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Simultaneous Equations\n \t7. Turtle draw parseTree\n \t8. Pemdas\n \t9. Toggle Auto Simplification \n\t10. Exit\n")
             solution = []
-            num = int(input("Enter choice:"))
-
+            num = input("Enter choice:")
+            if num.isdigit():
+                num = int(num)
+            else:
+                print("Please choose a valid option\n")
+                continue
             if num <= 0 or num > 10:
                 print("Please choose a valid option\n")
+            
+
+            
             elif num == 1:
-                statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
-                var, statement = statement.split('=' , 1)
+                passed = False
+                while passed != True:
+                    statement = input("Please enter assignment statement you want to add/modify:\nFor example, a=(1+2)\n")
+                    try:
+                        var, statement = statement.split('=' , 1)
+                    except:
+                        print("Invalid input, please re-enter\n")
+                        continue
+                    if len(var) == 0 or len(statement) <= 3 or (statement[0] == '(' and statement[-1] == ')') == False:
+                        print("Invalid input, please re-enter\n")
+                        continue
+                    else:
+                        passed = True
                 tree = ParseTree(statement)
                 self.storage[var] = tree
                 #check variable for coefficients
@@ -80,7 +99,10 @@ class Gui:
                 else:
                     print(f"{evaloption}-->None")
             elif num == 4:
-                filepath = input("Please enter the input file: ")
+                filepath = ''
+                while validator.filevalidation(filepath):
+                    filepath = input("Please enter the input file: ")
+                    filepath = validator.addtxt(filepath)
                 with open(filepath) as fp:
                     line = fp.readline()
                     while line:
@@ -108,11 +130,17 @@ class Gui:
                 self.sort_assignment_statements(output_name)
 
             elif num == 6:
-                equation = input('Welcome to the Linear Equation Solver, please enter the first equation:\n')
-                variables = re.findall(r'[a-zA-Z]+', equation)
-                variables = list(set(variables))
-                var, statement = equation.split('=' , 1)
-                self.LinearEquation(var, statement, variables)
+                while True:
+                    equation = input('\n\nWelcome to the Simultaneous Equation Solver, please enter the first equation:\n')
+                    variables = re.findall(r'[a-zA-Z]+', equation)
+                    variables = list(set(variables))
+                    try:
+                        var, statement = equation.split('=' , 1)
+                        break
+                    except:
+                        print('Invalid input, please re-enter')
+                        continue
+                self.SimultaneousEquation(var, statement, variables)
 
             elif num == 7:
                 expression_choice = input("Enter the variable name to visualize its expression: ")
@@ -131,13 +159,13 @@ class Gui:
                     state = 'On'
                 choice = ''
                 while choice not in ['y','n']:
-                    choice = input(f'\n\nTurning this on will automatically convert assignment statements into the form of 1var = expression\nCurrent State:{state}\nDo you want to toggle auto simplification?(y/n)')
+                    choice = input(f'\n\nTurning this on will automatically convert assignment statements into the form of 1var = expression\nCurrent State:{state}\nDo you want to toggle auto simplification?(y/n): ')
                 if choice == 'y':
                     self.safety = not self.safety
                     if self.safety:
-                        print('Auto Simplification is On')
+                        print('Auto Simplification is now Off')
                     else:
-                        print('Auto Simplification is On')
+                        print('Auto Simplification is now On')
                     input('\nPress enter key, to continue...')
                 else:
                     pass
@@ -330,23 +358,31 @@ class Gui:
             return new_var, statement
 
 
-    def LinearEquation(self, var, statement, varlist):
-        equation2 = input(f'Linear equation detected, please enter the second equation to complete a simultaneous equation (if you do not wish to continue with this, leave this input blank):\n')
-        if equation2 == '':
-            return
-        var2, statement2 = equation2.split('=' , 1)
+    def SimultaneousEquation(self, var, statement, varlist):
+        while True:
+            equation2 = input(f'Simultaneous equation detected, please enter the second equation to complete a simultaneous equation (if you do not wish to continue with this, leave this input blank):\n')
+            if equation2 == '':
+                return
+            try: 
+                var2, statement2 = equation2.split('=' , 1)
+                break
+            except:
+                print('Invalid input, please re-enter')
+                continue
         #check if the variables in the 2 equations are the same
-        varlist2 = re.findall(r'[a-zA-Z]+', var2)
+        varlist2 = re.findall(r'[a-zA-Z]+', equation2)
         varlist2 = list(set(varlist2))
         if varlist != varlist2:
-            print('Cannot solve the simultaneous equations, The inputted variables are not the same')
+            print('Cannot solve the simultaneous equations, The inputed variables are not the same')
             return
+        #Move all variables to the left side of the equation
+
         #store the 2nd equation into the storage
         tree = ParseTree(statement2)
         self.storage[var2] = tree
         #try to solve the equation using numpy
         import numpy as np
-        #convert the equations into the "standard" linear equation form
+        #convert the equations into the "standard" Simultaneous equation form
         pattern = re.compile(r'[a-zA-Z]+')
         var, statement = self.checkstat(var, statement)
         var2, statement2 = self.checkstat(var2, statement2)
@@ -382,13 +418,22 @@ class Gui:
                 choice = input('Do you want to save the solution?(y/n)\nNote that this will replace any assignments which may have the same name: ')
                 if choice == 'y':
                     for i in range(len(solution)):
+                        solution[i] = round(solution[i], 2)
                         self.storage[variables[i]] = ParseTree(f'{solution[i]}')
                 else:
                     pass
         except:
-            print('Cannot solve linear equations')
+            print('Cannot solve Simultaneous equations')
             pass
-
+    
+    def MoveVarLHS(self, var, statement):
+        #Get all the variables on the right side of the equation
+        match = re.findall(r'[a-zA-Z]+', statement)
+        if len(match) == 0:
+            return var, statement
+        else:
+            #find all "words" in the var side of the equation (variables)
+            match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', var)
 
     def draw_parse_tree(self, expression):
         parsed_tree = ParseTree(expression, self.storage)
