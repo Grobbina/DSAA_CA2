@@ -101,8 +101,7 @@ class Gui:
                 else:
                     print(f"{evaloption}-->None")
             elif num == 4:
-                filepath = input("Please enter the input file: ")
-                filepath = validator.addtxt(filepath)
+                filepath = ''
                 while validator.filevalidation(filepath):
                     filepath = input("Please enter the input file: ")
                     filepath = validator.addtxt(filepath)
@@ -202,6 +201,7 @@ class Gui:
             if another_expression != 'y':
                 break
     
+    #Sort the assignment statements and write it into an output file
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
 
@@ -214,12 +214,13 @@ class Gui:
                 sorted_statements[value] = []
 
             sorted_statements[value].append(f'{var}={original}')
-
         with open(output_name, 'w') as output_file:
-            for value, statements in sorted_statements.items():
+            for value, statements in sorted(sorted_statements.items(), key=lambda x: float(x[0]) if x[0] and x[0] != 'None' else 0, reverse=True):
                 output_file.write(f'*** Statements with value => {value}\n')
                 for statement in statements:
                     output_file.write(f'{statement}\n')
+
+
 
         print(f"Sorted content has been written to {output_name}")
 
