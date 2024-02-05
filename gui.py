@@ -376,7 +376,8 @@ class Gui:
             print('Cannot solve the simultaneous equations, The inputed variables are not the same')
             return
         #Move all variables to the left side of the equation
-
+        var, statement = self.MoveVarLHS(var, statement)
+        var2, statement2 = self.MoveVarLHS(var2, statement2)
         #store the 2nd equation into the storage
         tree = ParseTree(statement2)
         self.storage[var2] = tree
@@ -384,6 +385,7 @@ class Gui:
         import numpy as np
         #convert the equations into the "standard" Simultaneous equation form
         pattern = re.compile(r'[a-zA-Z]+')
+        print(var, statement, var2, statement2)
         var, statement = self.checkstat(var, statement)
         var2, statement2 = self.checkstat(var2, statement2)
 
@@ -406,6 +408,7 @@ class Gui:
         #convert the equations into numpy arrays
         nparray = np.array(nparray)
         rhs = np.array([int(statement), int(statement2)])
+        print(nparray, rhs)
         #solve the equations
         try:
             solution = np.linalg.solve(nparray, rhs)
@@ -432,8 +435,39 @@ class Gui:
         if len(match) == 0:
             return var, statement
         else:
-            #find all "words" in the var side of the equation (variables)
-            match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', var)
+            #Get all the variables on the right side of the equation
+            match = re.findall('([+-]?\d*[a-z])', statement)
+            #Move it to the left side of the equation
+            tomove = match
+            #Find all the numbers in the left side of the equation
+            match = re.findall(r'([+-]?\d+)\b(?!\w)', var)
+            #Move it to the right side of the equation
+            tomove2 = match
+            numbers = [int(num) for num in tomove2 if num]
+            # Calculate the sum
+            total_sum = sum(numbers)
+            #Remove the numbers from the left
+            var = re.sub(r'([+-]?\d+)\b(?!\w)', '', var)
+            statement = ''
+            if total_sum:
+                if str(total_sum)[:1] == '-':
+                    statement = f'{str(total_sum)[1:]}'
+                else:
+                    statement = f'-{total_sum}'
+            #move the variable to the left side of the equation
+            for i in tomove:
+                if i[0] != '+' and i[0] != '-':
+                    var += f'-{i}'
+                elif i[0] == '-':
+                    var += f'+{i[1:]}'
+                else:
+                    var += f'-{i[1:]}'
+            return var, statement
+
+            
+
+            
+
 
     def draw_parse_tree(self, expression):
         parsed_tree = ParseTree(expression, self.storage)

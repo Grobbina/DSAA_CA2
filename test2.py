@@ -1,45 +1,33 @@
 import re
 
-def MoveVarLHS(var, statement):
-        #find all "words" in the var side of the equation (variables)
-        match = re.findall(r'[a-zA-Z]+', var)
-        #if there is only 1 variable in the var side of the equation
-        if len(match) == 1:
-            return var, statement
-        else:
-            for i in range(len(match)-1):
-                match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', var)
-                tokeep = match.group()
-                tomove = var.replace(tokeep, '')
-                #check if the variables are already in the storage, if it is, we use another variable to store the equation, 
-                #if all variables are, replace the last variable in storage with the equation
-                for i in range(len(match)-1):
-                    #check if tokeep is already in storage
-                    match = re.search(r'[a-zA-Z]+', tokeep)
-                    if match.group() in self.storage:
-                        #if it is, we use another variable to store the equation
-                        match = re.search('([+-]?\d*)[0-9]*[a-zA-Z]+', tomove)
-                        tokeep = match.group()
-                        tomove = var.replace(tokeep, '')
-                    else:
-                        break
-                #add a 0 to the front of the equation
-                #move to the right side of the equation
-                if tomove[0] == '+':
-                    tomove = tomove.replace('+', '')
-                statement = f'{statement}-{tomove}'
-                #evaluate the 'numeric' part of the equation
-                #extract only numerics not followed by a letter but following a + or - sign
-                matchno = re.findall(r'(\+?-?\d+(?![a-zA-Z]))', statement)
-                evaluated = sum([int(i) for i in matchno])
-                #redefine the statement with the evaluated numerics
-                #remove the numerics used in the evaluation
-                statement = re.sub(r'(\+?-?\d+(?![a-zA-Z]))', '', statement)
-
-                statement = f'{evaluated}+{statement}'
-                return tokeep, statement
-            
-
-if __name__ == '__main__':
-    print(MoveVarLHS(var = '3x+2y+3z', statement = '0')) # ('3x', '-3y-3z')
-    print(MoveVarLHS(var = '3x+2y+3z', statement = '3x+2y+3z')) # ('3x', '0')
+statement = "-3y"
+var = "2x-20"
+#Get all the variables on the right side of the equation
+#find all "words" on the expression side of the equation (statement)
+match = re.findall('([+-]?\d*[a-z])', statement)
+#Move it to the left side of the equation
+tomove = match
+#Find all the numbers in the left side of the equation
+match = re.findall(r'([+-]?\d+)\b(?!\w)', var)
+#Move it to the right side of the equation
+tomove2 = match
+numbers = [int(num) for num in tomove2 if num]
+# Calculate the sum
+total_sum = sum(numbers)
+#Remove the numbers from the left
+var = re.sub(r'([+-]?\d+)\b(?!\w)', '', var)
+statement = ''
+if total_sum:
+    if str(total_sum)[:1] == '-':
+        statement = f'{str(total_sum)[1:]}'
+    else:
+        statement = f'-{total_sum}'
+#move the variable to the left side of the equation
+for i in tomove:
+    if i[0] != '+' and i[0] != '-':
+        var += f'-{i}'
+    elif i[0] == '-':
+        var += f'+{i[1:]}'
+    else:
+        var += f'-{i[1:]}'
+print(var)
