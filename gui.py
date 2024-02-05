@@ -5,7 +5,7 @@ from Classes.BinaryTree import BinaryTree
 import turtle
 #from Classes.MatrixOperations import MatrixOperations
 from Classes.validation import validator
-from Classes.MatrixOperations import MatrixExpressionEvaluator
+from Classes.MatrixOperations import MatrixOperation
 validator = validator()
 
 def starty():
@@ -31,7 +31,7 @@ class Gui:
         self.safety = True
 
         while True:
-            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Simultaneous Equations\n \t7. Turtle draw parseTree\n \t8. Pemdas\n \t9. Toggle Auto Simplification \n\t10. Exit\n")
+            print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Simultaneous Equations\n \t7. Turtle draw parseTree\n \t8. Perform Matrix or Column Vector Operations\n \t9. Toggle Auto Simplification \n\t10. Exit\n")
             solution = []
             num = input("Enter choice:")
             if num.isdigit():
@@ -152,7 +152,7 @@ class Gui:
                 input("\n Press enter key to continue...")  
 
             elif num == 8:
-                print('ejool')
+                self.perform_matrix_vector_operations()
             elif num == 9:
                 if self.safety:
                     state = 'Off'
@@ -176,22 +176,29 @@ class Gui:
             else:
                 print('Invalid Option! Please re-enter.')
     
-    
-    def perform_matrix_operations(self):
-        expression = input("Enter matrix expression (e.g., [[1,2],[3,4]]*[[5,6],[7,8]]): ")
-        try:
-            matrix_evaluator = MatrixExpressionEvaluator(expression)
-            matrix1, matrix2, operator, result = matrix_evaluator.evaluate()
+    #Perform Matrix and Vector operations
+    def perform_matrix_vector_operations(self):
+        while True:
+            operation_type = input("Do you want to perform Matrix or Vector Operations? [M/V]: ").upper()
 
-            print("\nMatrix 1:")
-            print(matrix1)
-            print("\nMatrix 2:")
-            print(matrix2)
-            print("\nOperator:", operator)
-            print("\nResult:")
-            print(result)
-        except Exception as e:
-            print(f"Error performing matrix operations: {e}")
+            if operation_type not in ['M', 'V']:
+                print("Invalid input. Please enter 'M' for Matrix or 'V' for Vector.")
+                continue
+            expression = input(f"Please enter {'Matrix' if operation_type == 'M' else 'Vector'} Expression: ")
+
+            matrix_operation = MatrixOperation(expression)
+
+            result = matrix_operation.perform_operation()
+
+            if result is not None:
+                print(f"Result: {result}")
+            else:
+                print("Unable to perform the operation. Please check your input.")
+
+            another_expression = input("Evaluate another expression? [y/n]: ").lower()
+
+            if another_expression != 'y':
+                break
     
     def sort_assignment_statements(self, output_name):
         sorted_statements = {}
