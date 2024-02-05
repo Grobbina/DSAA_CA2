@@ -3,7 +3,7 @@ from Classes.Stack import Stack
 import re
 from Classes.BinaryTree import BinaryTree
 import turtle
-from Classes.MatrixOperations import MatrixOperations
+#from Classes.MatrixOperations import MatrixOperations
 from Classes.validation import validator
 validator = validator()
 

@@ -1,16 +1,50 @@
 import re
-import turtle
-import numpy as np
 from Classes.BinaryTree import BinaryTree
 from Classes.Stack import Stack
+import numpy as np
 
-class MatrixOperations(BinaryTree):
+class MatrixTree(BinaryTree):
     def __init__(self, expression, storage=None):
         super().__init__('?')
         self.expression = expression
-        #self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]|\[|\]', expression)
-        self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]|\[|\]', expression)
+        # Updated regex to handle matrix expressions
+        self.tokens = re.findall(r'\d+\.\d+|\d+|[a-zA-Z_][a-zA-Z0-9_]*|\*\*|[+\-*/()]|\[\[.+?\]\]', expression)
 
+        # Check for negatives and insert missing multiplication operators
+        loop = len(self.tokens) - 1
+        i = 0
+        while loop > 0:
+            if self.tokens[i] in ['*', '/', '(',')'] and self.tokens[i + 1] == '-':
+                # Check that the next token is a number
+                if self.is_digit_neg(self.tokens[i + 2]):
+                    del self.tokens[i + 1]
+                    loop -= 1
+                    self.tokens[i + 1] = f'-{self.tokens[i + 1]}'
+                else:
+                    self.tokens[i + 1] = f'-1'
+                    self.tokens.insert(i + 2, '*')
+                    loop += 1
+            loop -= 1
+            i += 1
+
+            if self.tokens[i] == '-' and self.tokens[i + 1] == '-':
+                del self.tokens[i]
+                self.tokens[i] = '+'
+                loop -= 1
+            if self.tokens[i] == '+' and self.tokens[i + 1] == '-':
+                del self.tokens[i]
+                loop -= 1
+        # If tokens are a number followed by a variable, add a * between them
+        for i in range(len(self.tokens) - 1):
+            if self.is_digit_neg(self.tokens[i]) and self.tokens[i + 1].isalpha():
+                self.tokens.insert(i + 1, '*')
+                # Insert brackets as well
+                self.tokens.insert(i, '(')
+                self.tokens.insert(i + 4, ')')
+        # If a number is followed by an opening bracket, add a * between them
+        for i in range(len(self.tokens) - 1):
+            if self.is_digit_neg(self.tokens[i]) and self.tokens[i + 1] == '(':
+                self.tokens.insert(i + 1, '*')
         self.current_index = 0
         self.storage = storage or {}
         self.tree = self.build()
@@ -22,29 +56,22 @@ class MatrixOperations(BinaryTree):
         currentTree = tree
 
         for t in self.tokens:
-            if t == '[':
+            if t == '(':
                 currentTree.insertLeft('?')
                 stack.push(currentTree)
                 currentTree = currentTree.getLeftTree()
 
-            elif t == ']':
-                currentTree = stack.pop()
-
             elif t in ['+', '-', '*', '/', '**']:
-                while (not stack.isEmpty() and
-                    stack.peek().getKey() in ['+', '-', '*', '/', '**'] and
-                    self._get_precedence(t) <= self._get_precedence(stack.peek().getKey())):
-                    currentTree = stack.pop()
-
                 currentTree.setKey(t)
                 currentTree.insertRight('?')
                 stack.push(currentTree)
                 currentTree = currentTree.getRightTree()
 
-            elif t not in ['+', '-', '*', '/', ')', '**', '[', ']']:
-                if '[' in t:
-                    currentTree.setKey(self._parse_matrix(t))
-                elif t.isalpha():
+            elif t == ')':
+                currentTree = stack.pop()
+
+            elif t not in ['+', '-', '*', '/', ')', '**']:
+                if t.isalpha():
                     currentTree.setKey(t)
                 else:
                     currentTree.setKey(float(t))
@@ -53,20 +80,6 @@ class MatrixOperations(BinaryTree):
 
         return tree
 
-    def _get_precedence(self, operator):
-        precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '**': 3}
-        return precedence.get(operator, 0)
-
-
-    def _parse_matrix(self, matrix_str):
-        matrix_str = matrix_str[1:-1]  # Remove brackets
-        rows = matrix_str.split(';')
-        matrix = []
-        for row in rows:
-            elements = [float(e) for e in row.split(',')]
-            matrix.append(elements)
-        return np.array(matrix)
-
     def evaluate(self):
         return self._evaluate_recursive(self.tree)
 
@@ -74,8 +87,10 @@ class MatrixOperations(BinaryTree):
         if tree is None:
             return None
 
-        if isinstance(tree.getKey(), np.ndarray):
+        if isinstance(tree.getKey(), float):
             return tree.getKey()
+        elif isinstance(tree.getKey(), list):  # Handle matrix operations
+            return self._evaluate_matrix(tree)
 
         operator = tree.getKey()
         left_value = self._evaluate_recursive(tree.getLeftTree())
@@ -84,33 +99,34 @@ class MatrixOperations(BinaryTree):
         if left_value is None or right_value is None:
             return None
 
-        if operator == '+' or operator == '-' or operator == '*' or operator == '/':
-            if isinstance(left_value, np.ndarray) and isinstance(right_value, np.ndarray):
-                return self._matrix_operation(operator, left_value, right_value)
-            else:
-                raise ValueError("Invalid matrix operation or operands")
-
-        if operator == '**':
-            if isinstance(left_value, np.ndarray) and isinstance(right_value, (int, float)):
-                return left_value ** right_value
-            else:
-                raise ValueError("Invalid matrix operation or operands")
-
-        return self._get_variable_value(operator, left_value, right_value)
-
-
-    def _matrix_operation(self, operator, matrix1, matrix2):
         if operator == '+':
-            return np.add(matrix1, matrix2)
+            return left_value + right_value
         elif operator == '-':
-            return np.subtract(matrix1, matrix2)
+            return left_value - right_value
         elif operator == '*':
-            return np.dot(matrix1, matrix2)
+            return left_value * right_value
+        elif operator == '/':
+            return left_value / right_value
+        elif operator == '**':
+            return left_value ** right_value
         else:
-            return None
+            # Assuming it's a variable
+            return self._get_variable_value(operator, left_value, right_value)
 
-    def _get_variable_value(self, variable, left_value, right_value):
-        return self.storage.get(variable, None) or right_value
+    def _evaluate_matrix(self, tree):
+        matrix_expression = tree.getKey()
+        matrix_values = self._parse_matrix_expression(matrix_expression)
+        return np.array(matrix_values)
+
+    def _parse_matrix_expression(self, matrix_expression):
+        # Remove outer brackets and split by '],[' to get rows
+        matrix_str = matrix_expression[2:-2]
+        rows = matrix_str.split('],[')
+
+        # Split each row by ',' to get individual values
+        matrix_values = [list(map(float, row.split(','))) for row in rows]
+
+        return matrix_values
 
     def printInorder(self, level):
         leftTree = self.tree.getLeftTree()
@@ -128,12 +144,17 @@ class MatrixOperations(BinaryTree):
         except ValueError:
             return False
 
+    def _get_variable_value(self, variable, left_value, right_value):
+        return self.storage.get(variable, None) or right_value
+
     def __str__(self):
         return self.expression
 
 
+# Example usage
 if __name__ == '__main__':
-    matrix_tree = MatrixOperations('[[1,2],[3,4]]+[[5,6],[7,8]]')
-    matrix_tree.printInorder(0)
-    print(matrix_tree.evaluate())
-    print(matrix_tree)
+    tree = ParseTree('[[1,2],[3,4]] + [[5,6],[7,8]]')
+    tree.printInorder(0)
+    result = tree.evaluate()
+    print(result)
+    print(tree)
