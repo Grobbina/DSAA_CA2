@@ -1,13 +1,14 @@
+#Imports
 from Classes.ParseTree import ParseTree
 from Classes.Stack import Stack 
 import re
 from Classes.BinaryTree import BinaryTree
 import turtle
-#from Classes.MatrixOperations import MatrixOperations
 from Classes.validation import validator
 from Classes.MatrixOperations import MatrixOperation
 validator = validator()
 
+#Start
 def starty():
     input("""
     ******************************************************
@@ -22,14 +23,13 @@ def starty():
     Press Enter to continue...
     """)
 starty()
-
+#Class
 class Gui:
     def __init__(self):
         self.storage = {}
         self.values = {}
         self.lin = {}
         self.safety = True
-
         while True:
             print("Please select your choice (1,2,3,4,5,6):\n \t1. Add/Modify assignment statement\n \t2. Display Current Assignment Statement\n \t3. Evaluate a Single Variable\n \t4. Read Assignment statements from file\n \t5. Sort assignment statemnets\n \t6. Simultaneous Equations\n \t7. Turtle draw parseTree\n \t8. Perform Matrix or Column Vector Operations\n \t9. Toggle Auto Simplification \n\t10. Exit\n")
             solution = []
@@ -39,11 +39,8 @@ class Gui:
             else:
                 print("Please choose a valid option\n")
                 continue
-            if num <= 0 or num > 10:
-                print("Please choose a valid option\n")
-            
-
-            
+            if num <= 0 or num > 10: #Ensure that invalid options are caught
+                print("Please choose a valid option\n") 
             elif num == 1:
                 passed = False
                 while passed != True:
@@ -81,9 +78,9 @@ class Gui:
 
             elif num == 2:
                 print("\nCurrent Assignments:")
-                for var, parsed_tree in self.storage.items():
+                for var, parsed_tree in self.storage.items(): #search storage
                     original = parsed_tree
-                    parsed_tree = self.evaluateexpressions({var: parsed_tree})
+                    parsed_tree = self.evaluateexpressions({var: parsed_tree}) #evaluate expression
                     if parsed_tree is not None:
                         print(f'{var}={original}-->{parsed_tree.evaluate()}\n')
                     else:
@@ -92,17 +89,17 @@ class Gui:
             elif num == 3:
                 evaloption = input("Please enter variable you want to evaluate:\n")
                 print('\nExpression Tree:')
-                if evaloption in self.storage:
+                if evaloption in self.storage: #search varaible in storage
                     parsed_tree = self.storage[evaloption]
-                    parsed_tree = self.evaluateexpressions({evaloption: parsed_tree})
-                    value = parsed_tree.evaluate()
-                    parsed_tree.printInorder(0)
+                    parsed_tree = self.evaluateexpressions({evaloption: parsed_tree})  # check the assigned variable
+                    value = parsed_tree.evaluate() 
+                    parsed_tree.printInorder(0) #show tree build for choosen variable
                     print(f'Value for "{evaloption}" is {value}')
                 else:
-                    print(f"{evaloption}-->None")
+                    print(f"{evaloption}-->None") #if not assigened
             elif num == 4:
                 filepath = ''
-                while validator.filevalidation(filepath):
+                while validator.filevalidation(filepath): #validate file path
                     filepath = input("Please enter the input file: ")
                     filepath = validator.addtxt(filepath)
                 
@@ -117,7 +114,7 @@ class Gui:
                         line = fp.readline()
                 print('CURRENT ASSIGNMENTS:')
                 print('*'*10)
-                self.storage = dict(sorted(self.storage.items(), key=lambda key: key[0]))
+                self.storage = dict(sorted(self.storage.items(), key=lambda key: key[0])) #sort
                 for var, parsed_tree in self.storage.items():
                     original = parsed_tree
                     parsed_tree = self.evaluateexpressions({var: parsed_tree})
@@ -163,7 +160,7 @@ class Gui:
             elif num == 7:
                 expression_choice = input("Enter the variable name to visualize its expression: ")
                 if expression_choice in self.storage:
-                    self.draw_parse_tree(str(self.storage[expression_choice]))
+                    self.draw_parse_tree(str(self.storage[expression_choice])) # check if variable is in storage
                 else:
                     print("Invalid variable choice.")
                 input("\n Press enter key to continue...")  
@@ -199,7 +196,7 @@ class Gui:
             operation_type = input("Do you want to perform Matrix or Vector Operations? [M/V]: ").upper()
 
             if operation_type not in ['M', 'V']:
-                print("Invalid input. Please enter 'M' for Matrix or 'V' for Vector.")
+                print("Invalid input. Please enter 'M' for Matrix or 'V' for Vector.") # input must be eitehr m or v
                 continue
             expression = input(f"Please enter {'Matrix' if operation_type == 'M' else 'Vector'} Expression: ")
 
@@ -210,9 +207,9 @@ class Gui:
             if result is not None:
                 print(f"Result: {result}")
             else:
-                print("Unable to perform the operation. Please check your input.")
+                print("Unable to perform the operation. Please check your input.") 
 
-            another_expression = input("Evaluate another expression? [y/n]: ").lower()
+            another_expression = input("Evaluate another expression? [y/n]: ").lower() # check if user wnats to continue evaluating
 
             if another_expression != 'y':
                 break
@@ -235,8 +232,6 @@ class Gui:
                 output_file.write(f'*** Statements with value => {value}\n')
                 for statement in statements:
                     output_file.write(f'{statement}\n')
-
-
 
         print(f"Sorted content has been written to {output_name}")
 
@@ -496,11 +491,7 @@ class Gui:
             return var, statement
 
             
-
-            
-
-
-    def draw_parse_tree(self, expression):
+    def draw_parse_tree(self, expression): # draw the tree
         parsed_tree = ParseTree(expression, self.storage)
         self._visualize_tree(parsed_tree.tree)
 
@@ -547,6 +538,7 @@ class Gui:
                     turtle.penup()
                     turtle.forward(10)
                     turtle.pendown()
+                    #Recursive, draws extended branches
                     self._draw_tree_recursive(ParseTree(str(self.storage[tree.getKey()])).tree, distance * scale_factor*0.8, angle, scale_factor)
                     turtle.penup()
                     turtle.backward(10)

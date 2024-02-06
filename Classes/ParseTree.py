@@ -49,14 +49,14 @@ class ParseTree(BinaryTree):
         self.storage = storage or {}
         self.tree = self.build()
 
-     
+     #Build Parse Tree
     def build(self):
             stack = Stack()
             tree = BinaryTree('?')
             stack.push(tree)
             currentTree = tree
 
-            for t in self.tokens:
+            for t in self.tokens:  #checks and hadles diff ways tokens are parsed
                 if t == '(':
                     currentTree.insertLeft('?')
                     stack.push(currentTree)
@@ -84,8 +84,8 @@ class ParseTree(BinaryTree):
 
     def evaluate(self):
         return self._evaluate_recursive(self.tree)
-
-    def _evaluate_recursive(self, tree, division_by_zero=False):
+    #private, evalautes expression
+    def _evaluate_recursive(self, tree):
         if tree is None:
             return None
 
@@ -95,8 +95,8 @@ class ParseTree(BinaryTree):
             return self._evaluate_matrix(tree)
 
         operator = tree.getKey()
-        left_value = self._evaluate_recursive(tree.getLeftTree(), division_by_zero)
-        right_value = self._evaluate_recursive(tree.getRightTree(), division_by_zero)
+        left_value = self._evaluate_recursive(tree.getLeftTree())
+        right_value = self._evaluate_recursive(tree.getRightTree())
 
         if left_value is None or right_value is None:
             return None
@@ -107,12 +107,11 @@ class ParseTree(BinaryTree):
             return left_value - right_value
         elif operator == '*':
             return left_value * right_value
-        elif operator == '/':
+        elif operator == '/': #handle 0 division error
+            count=0
             if right_value == 0:
                 # Handle division by zero error
-                if not division_by_zero:
-                    print("Error: Division by zero")
-                    division_by_zero = True
+                print("Error: Division by zero")
                 return None
             else:
                 return left_value / right_value    
@@ -135,8 +134,7 @@ class ParseTree(BinaryTree):
         if leftTree != None:
             leftTree.printInorder(level+1)
 
-                
-    
+    #takes a string n as input and attempts to convert it into an integer using int(n)         
     def is_digit_neg(self, n: str) -> bool:
         try:
             int(n)
@@ -144,11 +142,11 @@ class ParseTree(BinaryTree):
         except ValueError:
          return False
 
-
+    # returns str
     def __str__(self):
         return self.expression
 
-    
+#Initialize    
 if __name__ == '_main_':
     tree = ParseTree('(0+3((20-(2(0+0)))/3.0))')
     tree.printInorder(0)
