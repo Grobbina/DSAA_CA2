@@ -144,6 +144,15 @@ class Gui:
                     except:
                         print('Invalid input, please re-enter')
                         continue
+                if len(variables) < 2:
+                    print('Invalid input, please re-enter')
+                    continue
+                #check whether there are any operators in the variable
+                match = re.search(r'[+\-*/]', var)
+                match2 = re.search(r'[+\-*/]', statement)
+                if not match and not match2:
+                    print('Invalid input, please re-enter')
+                    continue
                 self.SimultaneousEquation(var, statement, variables)
 
             elif num == 7:
@@ -372,6 +381,7 @@ class Gui:
         while True:
             equation2 = input(f'Simultaneous equation detected, please enter the second equation to complete a simultaneous equation (if you do not wish to continue with this, leave this input blank):\n')
             if equation2 == '':
+                print('Exiting.....')
                 return
             try: 
                 var2, statement2 = equation2.split('=' , 1)
@@ -384,6 +394,9 @@ class Gui:
         varlist2 = list(set(varlist2))
         if varlist != varlist2:
             print('Cannot solve the simultaneous equations, The inputed variables are not the same')
+            return
+        if len(varlist) < 2:
+            print('Cannot solve the simultaneous equations, The second equation is not a simultaneous equation')
             return
         #Move all variables to the left side of the equation
         var, statement = self.MoveVarLHS(var, statement)
