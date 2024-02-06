@@ -129,7 +129,13 @@ class Gui:
                 input('\nPress enter key, to continue...')
 
             elif num == 5:
+                #check whether the storage is empty
+                if len(self.storage) == 0:
+                    print('No assignment statements to sort')
+                    input('\nPress enter key, to continue...')
+                    continue
                 output_name = input("Enter the output name: ")
+                output_name = validator.addtxt(output_name)
                 self.sort_assignment_statements(output_name)
 
             elif num == 6:
