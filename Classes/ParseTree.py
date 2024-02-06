@@ -85,7 +85,7 @@ class ParseTree(BinaryTree):
     def evaluate(self):
         return self._evaluate_recursive(self.tree)
 
-    def _evaluate_recursive(self, tree):
+    def _evaluate_recursive(self, tree, division_by_zero=False):
         if tree is None:
             return None
 
@@ -95,8 +95,8 @@ class ParseTree(BinaryTree):
             return self._evaluate_matrix(tree)
 
         operator = tree.getKey()
-        left_value = self._evaluate_recursive(tree.getLeftTree())
-        right_value = self._evaluate_recursive(tree.getRightTree())
+        left_value = self._evaluate_recursive(tree.getLeftTree(), division_by_zero)
+        right_value = self._evaluate_recursive(tree.getRightTree(), division_by_zero)
 
         if left_value is None or right_value is None:
             return None
@@ -108,7 +108,14 @@ class ParseTree(BinaryTree):
         elif operator == '*':
             return left_value * right_value
         elif operator == '/':
-            return left_value / right_value
+            if right_value == 0:
+                # Handle division by zero error
+                if not division_by_zero:
+                    print("Error: Division by zero")
+                    division_by_zero = True
+                return None
+            else:
+                return left_value / right_value    
         elif operator == '**':
             return left_value ** right_value
         else:
