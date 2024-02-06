@@ -30,8 +30,11 @@ class validator():
                 return path
             else:
                 return path
+        else:
+            return path
 
 
 
 if __name__ == '__main__':
-    validator.filevalidation(path = 'Path to Check Here')
+    validator = validator()
+    validator.filevalidation('fruits.txt')

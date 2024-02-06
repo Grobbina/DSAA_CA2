@@ -106,6 +106,7 @@ class Gui:
                 while validator.filevalidation(filepath):
                     filepath = input("Please enter the input file: ")
                     filepath = validator.addtxt(filepath)
+                
                 with open(filepath) as fp:
                     line = fp.readline()
                     while line:
@@ -394,7 +395,6 @@ class Gui:
         import numpy as np
         #convert the equations into the "standard" Simultaneous equation form
         pattern = re.compile(r'[a-zA-Z]+')
-        print(var, statement, var2, statement2)
         var, statement = self.checkstat(var, statement)
         var2, statement2 = self.checkstat(var2, statement2)
 
@@ -417,7 +417,6 @@ class Gui:
         #convert the equations into numpy arrays
         nparray = np.array(nparray)
         rhs = np.array([int(statement), int(statement2)])
-        print(nparray, rhs)
         #solve the equations
         try:
             solution = np.linalg.solve(nparray, rhs)
@@ -457,10 +456,13 @@ class Gui:
             total_sum = sum(numbers)
             #Remove the numbers from the left
             var = re.sub(r'([+-]?\d+)\b(?!\w)', '', var)
-            statement = ''
+            statement = re.sub(r'([+-]?\d*[a-z])', '', statement)
             if total_sum:
                 if str(total_sum)[:1] == '-':
-                    statement = f'{str(total_sum)[1:]}'
+                    if len(statement) == 0:
+                        statement = f'{str(total_sum)[1:]}'
+                    else:
+                        statement = f'+{str(total_sum)[1:]}'
                 else:
                     statement = f'-{total_sum}'
             #move the variable to the left side of the equation
